@@ -1,51 +1,36 @@
-// =============================
-// PIPELINE 1: User engagement by demographics
-// =============================
-db.viewing_sessions.aggregate([
-  { $lookup: { from: "users", localField: "user_id", foreignField: "user_id", as: "user" } },
-  { $unwind: "$user" },
-  { $group: {
-      _id: { country: "$user.country", subscription: "$user.subscription_type" },
-      avg_completion: { $avg: "$completion_percentage" },
-      total_watch: { $sum: "$watch_duration_minutes" }
-  }},
-  { $sort: { total_watch: -1 } }
+// Pipeline 1: Top 3 contenidos más vistos
+// Selecciona título y número de vistas, ordena y limita a 3 resultados.
+db.content.aggregate([
+  { $project: { title: 1, views: "$metrics.views_count" } },
+  { $sort: { views: -1 } },
+  { $limit: 3 }
 ]);
 
-// =============================
-// PIPELINE 2: Content performance
-// =============================
+// Pipeline 2: Engagement promedio por país
+// Une sesiones con usuarios, agrupa por país y calcula promedio de completitud.
 db.viewing_sessions.aggregate([
-  { $lookup: { from: "content", localField: "content_id", foreignField: "content_id", as: "content" } },
-  { $unwind: "$content" },
-  { $group: {
-      _id: "$content.title",
-      total_views: { $sum: 1 },
-      avg_completion: { $avg: "$completion_percentage" }
-  }},
-  { $sort: { total_views: -1 } }
+  {
+    $lookup: {
+      from: "users",
+      localField: "user_id",
+      foreignField: "user_id",
+      as: "user_info"
+    }
+  },
+  { $unwind: "$user_info" },
+  {
+    $group: {
+      _id: "$user_info.country",
+      avgCompletion: { $avg: "$completion_percentage" }
+    }
+  },
+  { $sort: { avgCompletion: -1 } }
 ]);
 
-// =============================
-// PIPELINE 3: Geographic distribution of users
-// =============================
-db.users.aggregate([
-  { $group: {
-      _id: "$country",
-      total_users: { $sum: 1 },
-      avg_watch_time: { $avg: "$total_watch_time_hours" }
-  }},
-  { $sort: { total_users: -1 } }
-]);
-
-// =============================
-// PIPELINE 4: Device preference correlation
-// =============================
+// Pipeline 3: Distribución de dispositivos
+// Agrupa sesiones por tipo de dispositivo, cuenta sesiones y ordena.
 db.viewing_sessions.aggregate([
-  { $group: {
-      _id: "$device_type",
-      avg_completion: { $avg: "$completion_percentage" },
-      total_sessions: { $sum: 1 }
-  }},
-  { $sort: { total_sessions: -1 } }
+  { $group: { _id: "$device_type", sessions: { $sum: 1 } } },
+  { $sort: { sessions: -1 } },
+  { $project: { device: "$_id", sessions: 1, _id: 0 } }
 ]);
