@@ -1,0 +1,10 @@
+db.users.find().pretty()
+show collections
+use streaming_platform
+exit
+docker exec -it mongo_db mongosh
+show collections
+use streaming_platform
+db.users.find().pretty()
+show collections
+use streaming_platform
