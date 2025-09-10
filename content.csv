@@ -1,0 +1,301 @@
+content_id,title,content_type,genre,release_year,rating,production_budget,views_count
+M001,Advanced World,Movie,"[""Sci-Fi"", ""Horror"", ""Drama""]",2020,3.5,220088717,66721
+M002,Neural Signal,Movie,"[""Animation"", ""Horror""]",2021,2.8,23593231,11128
+M003,An Stream,Movie,"[""Action""]",2023,1.9,83166461,75949
+M004,Binary Journey,Movie,"[""Thriller"", ""Documentary""]",2022,3.0,46298444,85958
+M005,Lost Data,Movie,"[""Horror"", ""Romance""]",2022,4.7,67293750,56808
+M006,Ultimate Mystery,Movie,"[""Action"", ""Animation"", ""Horror""]",2024,1.1,234348717,148876
+M007,Code,Movie,"[""Comedy"", ""Romance""]",2022,3.1,35028167,9228
+M008,Digital Protocol,Movie,"[""Documentary"", ""Romance""]",2023,3.7,49545701,125068
+M009,Tale,Movie,"[""Drama"", ""Horror""]",2023,4.4,146895476,37911
+M010,An Code 2,Movie,"[""Comedy"", ""Romance"", ""Action""]",2021,3.5,224671521,78005
+M011,Algorithm,Movie,"[""Drama"", ""Animation"", ""Horror""]",2023,2.7,20512281,92634
+M012,Quest 5,Movie,"[""Comedy""]",2023,2.4,36408859,59155
+M013,Mystery,Movie,"[""Documentary"", ""Drama""]",2020,1.6,16064411,61328
+M014,Kingdom,Movie,"[""Thriller"", ""Action""]",2021,4.2,202395249,138918
+M015,Quantum Code,Movie,"[""Animation"", ""Documentary"", ""Sci-Fi""]",2021,2.4,227198245,13807
+M016,A Database,Movie,"[""Drama"", ""Documentary""]",2023,3.0,6729979,81858
+M017,Adventure,Movie,"[""Action"", ""Documentary"", ""Horror""]",2020,4.6,50839665,132014
+M018,Mystery,Movie,"[""Comedy"", ""Action""]",2023,3.6,158431993,81531
+M019,Final Stream,Movie,"[""Action""]",2023,2.3,114952801,144211
+M020,Quest,Movie,"[""Thriller"", ""Action"", ""Drama""]",2022,3.1,250548961,47873
+M021,Tale,Movie,"[""Drama"", ""Horror""]",2020,4.9,62478620,168298
+M022,Quantum System,Movie,"[""Horror""]",2023,4.7,73128204,116580
+M023,Smart Story,Movie,"[""Horror""]",2022,3.3,12509378,36200
+M024,First Mystery,Movie,"[""Horror""]",2020,4.2,146907831,117924
+M025,An Protocol,Movie,"[""Comedy""]",2020,4.0,49021276,26519
+M026,Lost Kingdom,Movie,"[""Documentary"", ""Drama"", ""Action""]",2024,2.6,90625130,113230
+M027,Quantum Story,Movie,"[""Thriller"", ""Horror"", ""Sci-Fi""]",2023,1.2,150283990,19816
+M028,Final Kingdom,Movie,"[""Comedy"", ""Horror"", ""Drama""]",2023,1.7,8816404,87291
+M029,System,Movie,"[""Documentary""]",2023,1.8,30738350,27793
+M030,Database 4,Movie,"[""Drama"", ""Action""]",2020,1.3,100987742,98063
+M031,Empire,Movie,"[""Action"", ""Animation"", ""Drama""]",2020,4.9,184475405,114316
+M032,A Code,Movie,"[""Thriller"", ""Action""]",2024,3.4,283617949,83014
+M033,Dark Stream,Movie,"[""Action"", ""Animation""]",2023,2.9,193790052,54865
+M034,Stream,Movie,"[""Romance"", ""Sci-Fi"", ""Action""]",2020,4.9,122112109,41348
+M035,Lost System 5,Movie,"[""Thriller"", ""Romance""]",2021,1.8,2127388,64414
+M036,Quest,Movie,"[""Romance"", ""Animation""]",2020,2.9,12670028,90335
+M037,Quest,Movie,"[""Animation"", ""Comedy"", ""Documentary""]",2022,1.2,33987762,13250
+M038,Data,Movie,"[""Animation"", ""Documentary""]",2021,3.6,15316213,47672
+M039,Lost Cloud,Movie,"[""Horror"", ""Drama"", ""Action""]",2020,2.8,202148811,48310
+M040,Quest,Movie,"[""Comedy"", ""Documentary"", ""Drama""]",2022,2.2,1600669,52925
+M041,Infinite Story,Movie,"[""Horror"", ""Thriller""]",2021,4.2,186923029,129104
+M042,Advanced System 2,Movie,"[""Documentary""]",2020,3.3,42856949,44583
+M043,Hidden Empire,Movie,"[""Horror""]",2024,4.1,128140036,290064
+M044,Cyber Cloud 4,Movie,"[""Animation"", ""Thriller""]",2024,3.3,8120314,8992
+M045,First Database,Movie,"[""Animation"", ""Action""]",2023,3.1,182644208,115282
+M046,Binary Signal,Movie,"[""Animation"", ""Documentary"", ""Thriller""]",2023,1.9,24000248,18247
+M047,Story,Movie,"[""Drama""]",2023,3.3,18448764,5974
+M048,Tale,Movie,"[""Horror"", ""Romance"", ""Documentary""]",2021,4.9,59289648,178486
+M049,Neural Cloud 2,Movie,"[""Drama"", ""Sci-Fi"", ""Action""]",2020,3.7,135871052,33051
+M050,Infinite Protocol,Movie,"[""Thriller"", ""Documentary""]",2021,2.0,39370044,53173
+M051,A Algorithm,Movie,"[""Animation""]",2022,4.8,106311259,136410
+M052,Adventure,Movie,"[""Horror"", ""Thriller"", ""Sci-Fi""]",2021,3.9,193008798,94063
+M053,Infinite Empire,Movie,"[""Action""]",2022,1.9,296179703,50863
+M054,Binary Stream,Movie,"[""Action"", ""Animation"", ""Documentary""]",2021,4.6,122289319,17832
+M055,Infinite Adventure,Movie,"[""Thriller""]",2023,3.6,37909361,121651
+M056,Binary Journey,Movie,"[""Thriller"", ""Action""]",2023,3.6,140493022,105627
+M057,Journey,Movie,"[""Drama"", ""Sci-Fi""]",2022,1.9,213938522,38409
+M058,Last Quest,Movie,"[""Documentary"", ""Animation"", ""Romance""]",2020,3.6,20440772,53146
+M059,System,Movie,"[""Sci-Fi"", ""Thriller"", ""Drama""]",2020,1.5,80650718,63578
+M060,Dark Kingdom,Movie,"[""Thriller"", ""Sci-Fi""]",2020,4.9,107714280,196906
+M061,An Cloud,Movie,"[""Drama"", ""Comedy"", ""Action""]",2022,4.6,181262622,58038
+M062,Secret Empire,Movie,"[""Horror""]",2024,1.1,45559979,113496
+M063,Neural Cloud,Movie,"[""Sci-Fi"", ""Drama""]",2024,4.5,52788131,241308
+M064,Virtual Adventure,Movie,"[""Drama"", ""Action""]",2024,4.4,99191442,99105
+M065,Final Story,Movie,"[""Documentary"", ""Romance"", ""Sci-Fi""]",2024,1.9,92334091,107506
+M066,Last World,Movie,"[""Animation""]",2024,4.1,232940727,139206
+M067,Smart World,Movie,"[""Documentary"", ""Romance"", ""Sci-Fi""]",2023,4.0,233435578,125397
+M068,Protocol,Movie,"[""Comedy"", ""Thriller"", ""Horror""]",2024,4.2,100149438,110097
+M069,Last World,Movie,"[""Horror""]",2022,4.0,39301506,12355
+M070,Lost Adventure,Movie,"[""Drama"", ""Sci-Fi""]",2020,1.7,218689270,5512
+M071,Cyber Tale,Movie,"[""Sci-Fi"", ""Drama"", ""Comedy""]",2023,4.3,139504878,292824
+M072,Secret Signal,Movie,"[""Romance""]",2022,1.6,8844926,60180
+M073,System,Movie,"[""Documentary"", ""Animation"", ""Action""]",2021,1.3,167251523,12675
+M074,Digital Database,Movie,"[""Comedy""]",2022,3.2,29227591,8998
+M075,Neural Journey,Movie,"[""Sci-Fi"", ""Thriller"", ""Romance""]",2020,4.2,296040480,84468
+M076,The Journey,Movie,"[""Thriller"", ""Documentary"", ""Animation""]",2020,2.4,27396354,78189
+M077,Signal,Movie,"[""Romance""]",2021,4.5,203590741,97638
+M078,Algorithm,Movie,"[""Comedy"", ""Romance"", ""Documentary""]",2024,1.6,13524987,28957
+M079,Secret Algorithm,Movie,"[""Thriller""]",2022,3.8,46138210,44993
+M080,Digital Empire,Movie,"[""Comedy""]",2022,3.5,49787105,51624
+M081,A Empire,Movie,"[""Thriller""]",2023,3.2,21843745,20857
+M082,Protocol,Movie,"[""Romance"", ""Action"", ""Comedy""]",2023,4.0,182661326,106275
+M083,Final World,Movie,"[""Horror""]",2023,1.1,9691644,147540
+M084,The Matrix,Movie,"[""Drama"", ""Comedy""]",2021,2.2,49636072,40998
+M085,Lost Adventure,Movie,"[""Action"", ""Romance""]",2022,4.4,272623780,185972
+M086,Data,Movie,"[""Thriller"", ""Horror"", ""Animation""]",2021,2.3,25908762,41342
+M087,A Data,Movie,"[""Action"", ""Romance"", ""Drama""]",2020,2.7,251619945,41100
+M088,Data,Movie,"[""Romance""]",2023,1.2,41797064,2689
+M089,Hidden Data,Movie,"[""Horror"", ""Sci-Fi"", ""Romance""]",2021,3.0,283777035,48176
+M090,Network,Movie,"[""Comedy"", ""Animation""]",2020,2.6,41347239,38966
+M091,Empire,Movie,"[""Animation"", ""Romance""]",2022,2.5,10832696,48892
+M092,Infinite Code,Movie,"[""Comedy"", ""Horror""]",2021,2.1,16160068,56151
+M093,Digital Code,Movie,"[""Horror"", ""Drama""]",2024,3.8,9974518,97083
+M094,Matrix,Movie,"[""Action"", ""Animation""]",2020,1.2,250209902,48295
+M095,Digital Tale,Movie,"[""Documentary"", ""Comedy"", ""Romance""]",2024,3.8,27080387,104163
+M096,Final Mystery 5,Movie,"[""Romance"", ""Comedy"", ""Action""]",2022,2.0,134466599,80921
+M097,Dark Stream,Movie,"[""Horror"", ""Comedy""]",2020,4.9,65465290,152164
+M098,Digital Data,Movie,"[""Horror"", ""Thriller"", ""Romance""]",2022,2.6,41421645,13908
+M099,Algorithm,Movie,"[""Animation"", ""Romance"", ""Action""]",2022,2.3,195742202,53649
+M100,Mystery,Movie,"[""Animation"", ""Drama"", ""Comedy""]",2022,2.5,1818805,85093
+M101,System,Movie,"[""Horror"", ""Sci-Fi"", ""Drama""]",2024,2.9,122138266,27931
+M102,A Algorithm,Movie,"[""Drama"", ""Action""]",2022,2.8,81782662,26612
+M103,Quantum Tale,Movie,"[""Sci-Fi"", ""Documentary"", ""Romance""]",2023,4.6,287247899,138177
+M104,Binary World,Movie,"[""Sci-Fi"", ""Horror"", ""Animation""]",2024,3.3,270713263,38659
+M105,Binary Tale,Movie,"[""Horror"", ""Animation""]",2021,2.3,16851330,50064
+M106,Lost Signal,Movie,"[""Thriller"", ""Horror""]",2023,1.7,12650123,40879
+M107,Lost Mystery,Movie,"[""Action"", ""Horror""]",2023,1.9,237678250,110017
+M108,System,Movie,"[""Sci-Fi"", ""Horror""]",2020,1.8,261117605,6930
+M109,Dark System,Movie,"[""Thriller"", ""Romance""]",2022,3.3,27286533,82962
+M110,Matrix,Movie,"[""Horror""]",2024,1.3,15437541,122971
+M111,Advanced Journey,Movie,"[""Comedy"", ""Horror"", ""Romance""]",2024,3.6,34267191,105915
+M112,A Code,Movie,"[""Action"", ""Thriller""]",2023,4.6,112473878,282006
+M113,Data,Movie,"[""Romance"", ""Horror"", ""Documentary""]",2024,2.6,26232769,3049
+M114,Digital World,Movie,"[""Horror"", ""Action"", ""Animation""]",2023,2.1,296850537,142473
+M115,Tale 3,Movie,"[""Horror"", ""Documentary""]",2021,2.7,6951330,68034
+M116,Lost Journey,Movie,"[""Animation""]",2023,3.3,10434415,127759
+M117,Database,Movie,"[""Animation""]",2021,2.2,37551639,63049
+M118,Hidden Protocol,Movie,"[""Horror"", ""Sci-Fi""]",2022,4.7,89066888,63208
+M119,Smart Story,Movie,"[""Thriller"", ""Animation""]",2021,4.1,142440797,173166
+M120,Journey,Movie,"[""Animation""]",2024,4.8,255815540,120498
+M121,Cyber Story,Movie,"[""Action"", ""Comedy"", ""Horror""]",2024,1.4,174934483,69015
+M122,Tale,Movie,"[""Drama"", ""Animation""]",2021,1.4,4637872,6716
+M123,A Algorithm,Movie,"[""Drama""]",2020,3.1,46274627,12676
+M124,The System,Movie,"[""Drama"", ""Comedy""]",2022,3.4,46362993,76099
+M125,Database 4,Movie,"[""Sci-Fi"", ""Romance"", ""Drama""]",2023,3.3,279552120,35452
+M126,Database,Movie,"[""Romance"", ""Sci-Fi"", ""Drama""]",2020,4.9,163474360,64854
+M127,Quantum Code,Movie,"[""Romance""]",2023,3.9,16053983,16005
+M128,Empire,Movie,"[""Comedy""]",2024,3.7,15349432,36846
+M129,Binary Quest 3,Movie,"[""Horror"", ""Romance"", ""Action""]",2023,3.7,216148457,26040
+M130,Algorithm,Movie,"[""Drama""]",2021,2.3,1748841,37032
+M131,Digital Database,Movie,"[""Romance""]",2023,1.8,23269808,148807
+M132,Smart Signal,Movie,"[""Thriller"", ""Comedy"", ""Horror""]",2023,4.4,270095317,279282
+M133,The Matrix,Movie,"[""Action"", ""Animation"", ""Horror""]",2023,4.7,121357321,258093
+M134,Virtual Protocol 3,Movie,"[""Horror"", ""Documentary"", ""Sci-Fi""]",2023,1.6,254284149,78294
+M135,Virtual Protocol,Movie,"[""Thriller"", ""Drama"", ""Action""]",2022,2.3,191946883,69254
+M136,Binary Kingdom,Movie,"[""Romance""]",2022,2.9,28422454,88910
+M137,Database,Movie,"[""Drama"", ""Comedy""]",2023,3.9,22921942,9513
+M138,An Code,Movie,"[""Action"", ""Comedy"", ""Thriller""]",2023,1.6,242376448,87837
+M139,Last Protocol,Movie,"[""Horror""]",2022,4.7,236093691,38614
+M140,Advanced Data 2,Movie,"[""Comedy"", ""Thriller""]",2020,1.8,7308564,45351
+M141,First Code,Movie,"[""Animation"", ""Horror"", ""Thriller""]",2022,4.3,53315034,89430
+M142,An Tale,Movie,"[""Action"", ""Documentary""]",2021,1.9,133696368,2329
+M143,Neural Tale,Movie,"[""Drama"", ""Romance""]",2022,2.0,4910257,53382
+M144,Digital Code,Movie,"[""Romance""]",2020,1.1,46568581,81549
+M145,System,Movie,"[""Sci-Fi"", ""Romance""]",2023,4.4,75165152,184899
+M146,Tale,Movie,"[""Horror""]",2023,2.5,28743877,46072
+M147,Network,Movie,"[""Romance""]",2021,1.9,27059829,41198
+M148,An Cloud,Movie,"[""Action"", ""Comedy"", ""Documentary""]",2021,1.8,224978395,9163
+M149,Hidden Empire,Movie,"[""Horror"", ""Sci-Fi""]",2021,2.4,104294448,25809
+M150,Code,Movie,"[""Romance""]",2023,1.1,20317587,60502
+M151,Advanced Data,Movie,"[""Animation"", ""Sci-Fi"", ""Thriller""]",2020,1.4,296809510,51058
+M152,The System,Movie,"[""Horror"", ""Action""]",2021,1.8,76361170,83126
+M153,The Signal,Movie,"[""Romance""]",2020,4.3,61937512,71076
+M154,Smart Quest,Movie,"[""Action"", ""Romance"", ""Comedy""]",2022,2.2,255057356,91513
+M155,Protocol 5,Movie,"[""Drama"", ""Documentary""]",2022,3.5,29320240,24458
+M156,Hidden Empire,Movie,"[""Comedy"", ""Sci-Fi""]",2023,2.8,126796962,138492
+M157,Lost Signal,Movie,"[""Horror"", ""Thriller""]",2021,4.4,82768207,68452
+M158,Stream,Movie,"[""Romance"", ""Drama"", ""Documentary""]",2022,2.1,10347685,69760
+M159,Digital Mystery,Movie,"[""Documentary"", ""Animation"", ""Sci-Fi""]",2022,2.5,181419290,37222
+M160,The Network,Movie,"[""Animation"", ""Comedy"", ""Horror""]",2023,2.5,32197439,143754
+M161,Binary Algorithm,Movie,"[""Comedy""]",2020,2.9,35306105,98457
+M162,Virtual Protocol 2,Movie,"[""Action"", ""Drama"", ""Sci-Fi""]",2021,4.4,120658510,28568
+M163,Infinite Adventure,Movie,"[""Drama"", ""Horror""]",2024,3.2,34444459,84447
+M164,Tale 4,Movie,"[""Thriller"", ""Romance""]",2022,3.7,46746241,73278
+M165,Last Network,Movie,"[""Comedy"", ""Documentary"", ""Thriller""]",2020,1.8,12128676,72562
+M166,Neural Story,Movie,"[""Drama""]",2024,3.1,38889369,42192
+M167,Advanced Cloud,Movie,"[""Comedy"", ""Action""]",2024,4.0,224823877,11439
+M168,Final Cloud,Movie,"[""Romance"", ""Horror""]",2024,2.6,40925209,64578
+M169,Final Code,Movie,"[""Sci-Fi"", ""Thriller"", ""Animation""]",2021,1.2,72369601,1988
+M170,Neural Story,Movie,"[""Thriller"", ""Action""]",2023,1.7,189280736,70180
+M171,Lost Empire,Movie,"[""Action"", ""Romance""]",2023,2.7,120092424,42336
+M172,Signal,Movie,"[""Sci-Fi"", ""Documentary"", ""Action""]",2023,2.3,93882546,66432
+M173,Tale 3,Movie,"[""Documentary"", ""Animation"", ""Sci-Fi""]",2023,1.6,126147515,66481
+M174,Lost System,Movie,"[""Horror"", ""Animation"", ""Action""]",2022,3.9,278366263,35385
+M175,Infinite Cloud,Movie,"[""Thriller"", ""Drama"", ""Horror""]",2021,4.0,11313895,61891
+M176,Secret Data,Movie,"[""Comedy"", ""Animation"", ""Drama""]",2020,4.3,262601670,130262
+M177,Advanced Network,Movie,"[""Sci-Fi""]",2020,2.0,226736717,60937
+M178,The Network,Movie,"[""Action""]",2021,4.2,115155790,74876
+M179,Virtual Tale,Movie,"[""Documentary"", ""Animation"", ""Sci-Fi""]",2023,3.7,108238184,12907
+M180,Advanced Data,Movie,"[""Romance""]",2022,2.5,20626435,98020
+M181,Ultimate World,Movie,"[""Animation"", ""Drama""]",2023,1.6,46411246,12774
+M182,Cyber Story,Movie,"[""Sci-Fi"", ""Documentary""]",2021,4.7,190865120,111104
+M183,Network,Movie,"[""Horror"", ""Comedy""]",2023,2.7,4322854,145621
+M184,A Database,Movie,"[""Animation"", ""Drama""]",2020,2.1,15029206,17079
+M185,Neural Journey 3,Movie,"[""Horror"", ""Thriller""]",2021,3.5,18997108,19391
+M186,The Algorithm,Movie,"[""Drama"", ""Animation"", ""Romance""]",2022,1.4,19753636,46579
+M187,Virtual Code,Movie,"[""Horror"", ""Animation""]",2024,1.4,41427116,126127
+M188,The Mystery,Movie,"[""Sci-Fi"", ""Documentary"", ""Animation""]",2023,3.2,63511442,66256
+M189,Final Protocol,Movie,"[""Horror"", ""Documentary"", ""Drama""]",2023,2.1,39609619,106363
+M190,Lost Empire,Movie,"[""Horror""]",2022,4.3,59509863,147992
+M191,Advanced Empire,Movie,"[""Animation"", ""Documentary"", ""Action""]",2024,4.3,227239256,197241
+M192,Advanced Database,Movie,"[""Documentary"", ""Horror"", ""Comedy""]",2022,3.9,13502962,18406
+M193,An Kingdom,Movie,"[""Documentary"", ""Sci-Fi""]",2023,2.4,197743810,138306
+M194,Final Quest,Movie,"[""Action"", ""Animation"", ""Comedy""]",2020,3.6,241573272,18416
+M195,Lost Protocol,Movie,"[""Documentary"", ""Drama""]",2024,3.7,14354168,141933
+M196,Journey,Movie,"[""Action""]",2022,1.7,218028074,38719
+M197,Stream,Movie,"[""Action""]",2020,2.2,68878404,85556
+M198,A Algorithm,Movie,"[""Drama""]",2022,1.2,35458430,50148
+M199,An Quest,Movie,"[""Horror"", ""Sci-Fi""]",2024,2.0,175499046,26557
+M200,Digital World,Movie,"[""Comedy"", ""Romance""]",2022,3.7,25039601,34686
+S001,The Investigators,Series,"[""Crime""]",2020,1.3,44041273,50315
+S002,The Investigators,Series,"[""Sci-Fi""]",2020,4.4,126866932,351932
+S003,System Archives,Series,"[""Documentary""]",2020,2.8,56625408,78137
+S004,Cyber Archives,Series,"[""Comedy"", ""Romance""]",2020,2.2,47182636,58071
+S005,The Scientists,Series,"[""Action"", ""Drama""]",2020,4.4,327965922,76998
+S006,The Scientists,Series,"[""Reality"", ""Crime""]",2020,1.5,10288145,34209
+S007,The Analysts,Series,"[""Documentary""]",2020,1.2,58423635,63328
+S008,Intelligence Cases,Series,"[""Reality"", ""Sci-Fi""]",2020,3.8,65923441,172536
+S009,The Investigators,Series,"[""Action""]",2020,3.4,25451448,176621
+S010,The Detectives,Series,"[""Romance"", ""Sci-Fi""]",2020,2.2,30273595,137965
+S011,Tech Cases,Series,"[""Crime"", ""Sci-Fi""]",2020,4.9,114902788,290490
+S012,Code Engineer Files,Series,"[""Sci-Fi""]",2020,4.1,208347149,170988
+S013,The Analysts,Series,"[""Documentary""]",2020,3.2,77414168,107304
+S014,System Master Records,Series,"[""Romance"", ""Drama""]",2020,1.7,396719513,120686
+S015,System Analyst Logs,Series,"[""Documentary""]",2020,1.7,86131629,173243
+S016,The Investigators,Series,"[""Action""]",2020,2.1,68265098,134389
+S017,Data Expert Chronicles,Series,"[""Action"", ""Drama""]",2020,2.4,137756173,12444
+S018,Code Files,Series,"[""Action"", ""Comedy""]",2020,1.5,19314996,157045
+S019,Analytics Archives,Series,"[""Romance"", ""Drama""]",2020,2.2,456731471,188719
+S020,The Analysts,Series,"[""Romance"", ""Crime""]",2020,2.2,30466126,66964
+S021,The Specialists,Series,"[""Crime""]",2020,3.0,98820528,33356
+S022,The Investigators,Series,"[""Reality"", ""Drama""]",2020,2.1,197105748,61463
+S023,The Engineers,Series,"[""Action"", ""Sci-Fi""]",2020,2.6,37455594,47152
+S024,The Detectives,Series,"[""Crime""]",2020,1.3,79333132,88924
+S025,Digital Master Files,Series,"[""Documentary""]",2020,3.7,65631668,181783
+S026,Analytics Chronicles,Series,"[""Comedy""]",2020,3.9,85960997,159023
+S027,The Specialists,Series,"[""Reality"", ""Romance""]",2020,3.6,17641045,124627
+S028,The Experts,Series,"[""Crime""]",2020,1.6,15293760,111067
+S029,Digital Diaries,Series,"[""Documentary""]",2020,1.8,68389735,81277
+S030,The Scientists,Series,"[""Romance"", ""Documentary""]",2020,4.5,400393000,268280
+S031,The Analysts,Series,"[""Crime""]",2020,4.2,415835464,328774
+S032,Tech Reports,Series,"[""Sci-Fi"", ""Reality""]",2020,1.7,95839378,53516
+S033,The Experts,Series,"[""Crime"", ""Romance""]",2020,3.0,19617530,186235
+S034,Tech Master Records,Series,"[""Drama""]",2020,4.2,210303817,250364
+S035,Cloud Chronicles,Series,"[""Action""]",2020,1.5,32588164,24212
+S036,Intelligence Logs,Series,"[""Comedy""]",2020,2.2,36342177,122031
+S037,The Experts,Series,"[""Reality""]",2020,1.3,6067543,177234
+S038,The Masters,Series,"[""Action""]",2020,4.3,228468542,91190
+S039,The Experts,Series,"[""Comedy"", ""Action""]",2020,3.2,55906418,186734
+S040,Cyber Archives,Series,"[""Drama"", ""Action""]",2020,4.4,467178636,269484
+S041,The Analysts,Series,"[""Action"", ""Romance""]",2020,2.0,8921678,193868
+S042,The Analysts,Series,"[""Action""]",2020,4.9,470357872,364998
+S043,The Specialists,Series,"[""Drama"", ""Reality""]",2020,1.4,352436532,36502
+S044,Cloud Reports,Series,"[""Comedy""]",2020,3.4,78560006,152609
+S045,The Scientists,Series,"[""Crime""]",2020,2.7,57056031,55899
+S046,Code Archives,Series,"[""Sci-Fi"", ""Drama""]",2020,2.2,292316186,46760
+S047,Intelligence Stories,Series,"[""Comedy"", ""Reality""]",2020,2.6,37685089,96207
+S048,The Experts,Series,"[""Comedy"", ""Documentary""]",2020,1.5,30228151,78818
+S049,Cyber Archives,Series,"[""Reality""]",2020,3.1,58765760,84555
+S050,The Experts,Series,"[""Sci-Fi"", ""Comedy""]",2020,4.6,291245363,111070
+S051,Cyber Diaries,Series,"[""Action""]",2020,4.3,368102832,68702
+S052,Intelligence Engineer Records,Series,"[""Action"", ""Crime""]",2020,1.2,60906031,101497
+S053,Analytics Archives,Series,"[""Sci-Fi""]",2020,2.2,41543684,49311
+S054,Intelligence Chronicles,Series,"[""Romance"", ""Action""]",2020,2.0,14694325,99736
+S055,The Scientists,Series,"[""Crime""]",2020,1.5,28230331,139418
+S056,The Scientists,Series,"[""Crime""]",2020,1.0,93373094,173098
+S057,Cyber Chronicles,Series,"[""Documentary"", ""Comedy""]",2020,4.1,499744453,241304
+S058,Data Logs,Series,"[""Comedy"", ""Romance""]",2020,1.2,66154832,99661
+S059,The Scientists,Series,"[""Documentary""]",2020,5.0,280522409,27954
+S060,The Detectives,Series,"[""Drama""]",2020,3.1,143304276,11044
+S061,Tech Master Files,Series,"[""Documentary""]",2020,2.9,99027997,17393
+S062,Digital Chronicles,Series,"[""Documentary"", ""Drama""]",2020,2.9,127511414,157616
+S063,Digital Archives,Series,"[""Drama"", ""Comedy""]",2020,4.0,382523478,60750
+S064,The Masters,Series,"[""Crime""]",2020,3.6,35573482,25420
+S065,The Detectives,Series,"[""Crime"", ""Drama""]",2020,3.0,278507421,183444
+S066,The Experts,Series,"[""Reality"", ""Romance""]",2020,2.9,63619939,128430
+S067,System Files,Series,"[""Crime""]",2020,2.4,73813095,71070
+S068,Analytics Cases,Series,"[""Sci-Fi""]",2020,3.3,69011874,63083
+S069,Network Chronicles,Series,"[""Action""]",2020,4.1,216309090,135238
+S070,The Analysts,Series,"[""Action""]",2020,4.0,18764279,165360
+S071,Code Logs,Series,"[""Crime""]",2020,4.7,299747822,133808
+S072,The Scientists,Series,"[""Romance""]",2020,3.8,27120174,110021
+S073,The Engineers,Series,"[""Documentary"", ""Romance""]",2020,1.6,55156195,174261
+S074,The Specialists,Series,"[""Reality"", ""Crime""]",2020,4.1,141489146,233200
+S075,The Investigators,Series,"[""Sci-Fi"", ""Action""]",2020,3.6,40425131,111955
+S076,The Analysts,Series,"[""Sci-Fi"", ""Crime""]",2020,1.9,87863196,187502
+S077,Cloud Investigator Reports,Series,"[""Action""]",2020,3.3,22963861,22208
+S078,Analytics Investigator Cases,Series,"[""Reality""]",2020,4.3,448231718,317878
+S079,The Engineers,Series,"[""Comedy"", ""Action""]",2020,4.0,30474598,181689
+S080,The Specialists,Series,"[""Romance""]",2020,2.5,18826461,22026
+S081,The Masters,Series,"[""Sci-Fi""]",2020,1.2,50151349,138903
+S082,Data Detective Chronicles,Series,"[""Action"", ""Comedy""]",2020,4.3,433505371,289734
+S083,Tech Stories,Series,"[""Comedy"", ""Reality""]",2020,5.0,383865974,200566
+S084,Data Logs,Series,"[""Sci-Fi"", ""Comedy""]",2020,1.5,5130193,35513
+S085,Network Chronicles,Series,"[""Reality"", ""Documentary""]",2020,4.3,470703264,21996
+S086,The Engineers,Series,"[""Reality""]",2020,4.8,410892898,39316
+S087,Tech Master Reports,Series,"[""Romance"", ""Drama""]",2020,3.4,490588000,177159
+S088,The Masters,Series,"[""Drama""]",2020,2.1,187164054,154597
+S089,The Detectives,Series,"[""Sci-Fi""]",2020,1.5,59438147,151436
+S090,The Engineers,Series,"[""Sci-Fi"", ""Comedy""]",2020,5.0,365233645,347312
+S091,The Analysts,Series,"[""Action"", ""Reality""]",2020,1.7,43450423,76250
+S092,Digital Specialist Logs,Series,"[""Drama""]",2020,3.6,393217790,153334
+S093,Tech Chronicles,Series,"[""Romance"", ""Comedy""]",2020,4.6,311117522,278890
+S094,The Experts,Series,"[""Romance"", ""Crime""]",2020,3.7,31623945,86610
+S095,The Masters,Series,"[""Crime"", ""Reality""]",2020,1.9,18661547,35777
+S096,Intelligence Records,Series,"[""Action"", ""Romance""]",2020,2.4,23847484,117083
+S097,The Masters,Series,"[""Crime""]",2020,1.6,40419226,64260
+S098,Analytics Scientist Diaries,Series,"[""Reality"", ""Crime""]",2020,4.8,174510618,96074
+S099,Network Stories,Series,"[""Romance"", ""Action""]",2020,2.7,22408059,43588
+S100,Digital Records,Series,"[""Romance"", ""Action""]",2020,1.5,96348351,156615
