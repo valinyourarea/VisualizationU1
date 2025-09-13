@@ -43,13 +43,12 @@ class Content(Base):
     __table_args__ = {'extend_existing': True}
 
     content_id = Column(String(10), primary_key=True, index=True)
-    title = Column(String(50), unique=True, index=True, nullable=False)
+    title = Column(String(50), index=True, nullable=False)
     content_type = Column(String(50), index=True, nullable=False)
     genre = Column(JSONB, index=True, nullable=False)
-    release_year = Column(Integer, index=True, nullable=False)
     rating = Column(Float, index=True, nullable=False)
     production_budget = Column(Float, index=True, nullable=False)
-    views_count = Column(Float, index=True, nullable=False)
+    
     
 
     # Relationship
@@ -61,6 +60,8 @@ class Movies(Base):
 
     content_id = Column(String(10), ForeignKey("content.content_id"), primary_key=True, index=True)
     duration_minutes = Column(Integer, index=True, nullable=False)
+    views_count = Column(Float, index=True, nullable=False)
+    release_year = Column(Integer, index=True, nullable=False)
 
     # Relationship
     content = relationship("Content", back_populates="movies") 
@@ -71,8 +72,8 @@ class Series(Base):
 
     content_id = Column(String(10), ForeignKey("content.content_id"), primary_key=True, index=True)
     avg_episode_duration = Column(Integer, index=True, nullable=False)
-    seasons = Column(Integer, index=True, nullable=False)
     episodes_per_season = Column(JSONB, index=True, nullable=False)
+    total_views = Column(Float, index=True, nullable=False)
 
     # Relationship
     content = relationship("Content", back_populates="movies") 
