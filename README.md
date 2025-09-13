@@ -55,9 +55,9 @@ Copy the Container ID from the PostgreSQL container.
 
 ## Step 7: Run the injection.py script
 
-    docker exec -it <postgres_container_name> psql -U postgres -d videoanalysisdb
+    docker-compose run --rm web python data/injection.py
 
-Replace <postgres_container_name> with the container ID you just copied.
+
 
 ## Project Data
 
