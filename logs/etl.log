@@ -1,0 +1,117 @@
+2025-09-26 03:58:34,300 - INFO - 🚀 Starting ETL pipeline
+2025-09-26 03:58:34,988 - INFO - Extracted 85736 rows from CSV
+2025-09-26 03:58:38,887 - INFO - Transformation completed (CSV→JSON + cleaning)
+2025-09-26 03:58:42,217 - INFO - Back-conversion JSON→CSV done
+2025-09-26 03:58:42,226 - INFO - Validation passed ✅
+2025-09-26 03:58:54,353 - INFO - Incremental load completed
+2025-09-26 03:58:54,353 - INFO - 🎉 ETL pipeline finished successfully
+2025-09-26 05:01:49,079 - INFO - 🚀 Starting ETL pipeline
+2025-09-26 05:01:49,100 - ERROR - ETL failed: name 'json' is not defined
+2025-09-26 05:01:49,101 - ERROR - ALERT: ETL Failure -> name 'json' is not defined (not sent, demo mode)
+2025-09-26 05:02:59,016 - INFO - 🚀 Starting ETL pipeline
+2025-09-26 05:02:59,321 - INFO - Extracted (2, 5000, 222785) rows from JSON and CSVs
+2025-09-26 05:03:00,210 - INFO - Transformation completed (CSV→JSON + cleaning)
+2025-09-26 05:03:00,214 - ERROR - ETL failed: Expected object or value
+2025-09-26 05:03:00,214 - ERROR - ALERT: ETL Failure -> Expected object or value (not sent, demo mode)
+2025-09-26 05:06:20,008 - INFO - 🚀 Starting ETL pipeline
+2025-09-26 05:06:20,277 - INFO - Extracted (2, 5000, 222785) rows from JSON and CSVs
+2025-09-26 05:06:21,093 - INFO - Transformation completed (CSV→JSON + cleaning)
+2025-09-26 05:06:21,096 - ERROR - ETL failed: All arrays must be of the same length
+2025-09-26 05:06:21,096 - ERROR - ALERT: ETL Failure -> All arrays must be of the same length (not sent, demo mode)
+2025-09-26 05:12:12,440 - INFO - 🚀 Starting ETL pipeline
+2025-09-26 05:12:12,725 - INFO - Extracted (2, 5000, 222785) rows from JSON and CSVs
+2025-09-26 05:12:13,555 - INFO - Transformation completed (CSV→JSON + cleaning)
+2025-09-26 05:12:13,555 - INFO - Back-conversion JSON→CSV done
+2025-09-26 05:12:13,555 - ERROR - ETL failed: name 'validate_content' is not defined
+2025-09-26 05:12:13,556 - ERROR - ALERT: ETL Failure -> name 'validate_content' is not defined (not sent, demo mode)
+2025-09-26 05:13:22,526 - INFO - 🚀 Starting ETL pipeline
+2025-09-26 05:13:22,789 - INFO - Extracted (2, 5000, 222785) rows from JSON and CSVs
+2025-09-26 05:13:23,611 - INFO - Transformation completed (CSV→JSON + cleaning)
+2025-09-26 05:13:23,612 - INFO - Back-conversion JSON→CSV done
+2025-09-26 05:13:23,613 - ERROR - ETL failed: name 'errors' is not defined
+2025-09-26 05:13:23,613 - ERROR - ALERT: ETL Failure -> name 'errors' is not defined (not sent, demo mode)
+2025-09-26 05:14:39,914 - INFO - 🚀 Starting ETL pipeline
+2025-09-26 05:14:40,180 - INFO - Extracted (2, 5000, 222785) rows from JSON and CSVs
+2025-09-26 05:14:40,985 - INFO - Transformation completed (CSV→JSON + cleaning)
+2025-09-26 05:14:40,986 - INFO - Back-conversion JSON→CSV done
+2025-09-26 05:14:40,987 - INFO - Validation passed ✅
+2025-09-26 05:14:40,988 - ERROR - ETL failed: dictionary update sequence element #0 has length 1; 2 is required
+2025-09-26 05:14:40,988 - ERROR - ALERT: ETL Failure -> dictionary update sequence element #0 has length 1; 2 is required (not sent, demo mode)
+2025-09-26 05:20:31,098 - INFO - 🚀 Starting ETL pipeline
+2025-09-26 05:20:31,358 - INFO - Extracted (2, 5000, 222785) rows from JSON and CSVs
+2025-09-26 05:20:32,152 - INFO - Transformation completed (CSV→JSON + cleaning)
+2025-09-26 05:20:32,152 - INFO - Back-conversion JSON→CSV done
+2025-09-26 05:20:32,154 - INFO - Validation passed ✅
+2025-09-26 05:20:32,158 - ERROR - ETL failed: When initializing mapper Mapper[Users(users)], expression 'Logs' failed to locate a name ('Logs'). If this is a class name, consider adding this relationship() to the <class 'models.Users'> class after both dependent classes have been defined.
+2025-09-26 05:20:32,158 - ERROR - ALERT: ETL Failure -> When initializing mapper Mapper[Users(users)], expression 'Logs' failed to locate a name ('Logs'). If this is a class name, consider adding this relationship() to the <class 'models.Users'> class after both dependent classes have been defined. (not sent, demo mode)
+2025-09-26 05:24:05,605 - INFO - 🚀 Starting ETL pipeline
+2025-09-26 05:24:05,868 - INFO - Extracted (2, 5000, 222785) rows from JSON and CSVs
+2025-09-26 05:24:06,700 - INFO - Transformation completed (CSV→JSON + cleaning)
+2025-09-26 05:24:06,701 - INFO - Back-conversion JSON→CSV done
+2025-09-26 05:24:06,702 - INFO - Validation passed ✅
+2025-09-26 05:24:06,710 - ERROR - ETL failed: Mapper 'Mapper[Content(content)]' has no property 'movies'.  If this property was indicated from other mappers or configure events, ensure registry.configure() has been called.
+2025-09-26 05:24:06,710 - ERROR - ALERT: ETL Failure -> Mapper 'Mapper[Content(content)]' has no property 'movies'.  If this property was indicated from other mappers or configure events, ensure registry.configure() has been called. (not sent, demo mode)
+2025-09-26 05:31:56,953 - INFO - 🚀 Starting ETL pipeline
+2025-09-26 05:31:57,206 - INFO - Extracted (2, 5000, 222785) rows from JSON and CSVs
+2025-09-26 05:31:57,976 - INFO - Transformation completed (CSV→JSON + cleaning)
+2025-09-26 05:31:57,976 - INFO - Back-conversion JSON→CSV done
+2025-09-26 05:31:57,977 - INFO - Validation passed ✅
+2025-09-26 05:31:57,978 - ERROR - ETL failed: name 'Users' is not defined
+2025-09-26 05:31:57,978 - ERROR - ALERT: ETL Failure -> name 'Users' is not defined (not sent, demo mode)
+2025-09-26 05:32:47,282 - INFO - 🚀 Starting ETL pipeline
+2025-09-26 05:32:47,536 - INFO - Extracted (2, 5000, 222785) rows from JSON and CSVs
+2025-09-26 05:32:48,286 - INFO - Transformation completed (CSV→JSON + cleaning)
+2025-09-26 05:32:48,287 - INFO - Back-conversion JSON→CSV done
+2025-09-26 05:32:48,288 - INFO - Validation passed ✅
+2025-09-26 05:32:48,346 - ERROR - ETL failed: reverse_property 'movies' on relationship Series.content references relationship Content.movies, which does not reference mapper Mapper[Series(series)]
+2025-09-26 05:32:48,346 - ERROR - ALERT: ETL Failure -> reverse_property 'movies' on relationship Series.content references relationship Content.movies, which does not reference mapper Mapper[Series(series)] (not sent, demo mode)
+2025-09-26 05:34:48,985 - INFO - 🚀 Starting ETL pipeline
+2025-09-26 05:34:49,247 - INFO - Extracted (2, 5000, 222785) rows from JSON and CSVs
+2025-09-26 05:34:50,033 - INFO - Transformation completed (CSV→JSON + cleaning)
+2025-09-26 05:34:50,033 - INFO - Back-conversion JSON→CSV done
+2025-09-26 05:34:50,035 - INFO - Validation passed ✅
+2025-09-26 05:35:01,234 - INFO - Incremental load completed
+2025-09-26 05:35:01,235 - INFO - 🎉 ETL pipeline finished successfully
+2025-09-26 16:58:28,242 - INFO - Starting ETL pipeline - PostgreSQL
+2025-09-26 16:58:28,242 - INFO - Process initiated at: 2025-09-26 16:58:28
+2025-09-26 16:58:28,243 - INFO - Phase 1: Data Extraction
+2025-09-26 16:58:28,573 - INFO - Extracted (2, 5000, 222785) rows from JSON and CSVs
+2025-09-26 16:58:28,573 - INFO - Phase 2: Data Transformation
+2025-09-26 16:58:29,405 - INFO - Transformation completed (CSV→JSON + cleaning)
+2025-09-26 16:58:29,406 - INFO - Back-conversion JSON→CSV done
+2025-09-26 16:58:29,406 - INFO - Phase 3: Data Validation
+2025-09-26 16:58:29,408 - INFO - Validation passed ✅
+2025-09-26 16:58:29,408 - INFO - Phase 4: PostgreSQL Loading
+2025-09-26 16:58:40,376 - INFO - Incremental load completed
+2025-09-26 16:58:40,376 - INFO - 🎉 ETL pipeline finished successfully
+2025-09-26 16:58:40,377 - INFO - ETL Pipeline Completed Successfully
+2025-09-26 16:58:40,377 - INFO - ==================================================
+2025-09-26 16:58:40,377 - INFO - PERFORMANCE SUMMARY:
+2025-09-26 16:58:40,377 - INFO -   Total pipeline duration: 12.13s
+2025-09-26 16:58:40,378 - INFO -   Extraction phase: 330.33ms (2.7%)
+2025-09-26 16:58:40,378 - ERROR - ETL failed after 12.14s: name 'transform_duration' is not defined
+2025-09-26 16:58:40,378 - ERROR - ALERT: ETL Failure -> Pipeline failed after 12.14s
+Error: name 'transform_duration' is not defined (not sent, demo mode)
+2025-09-26 16:59:53,910 - INFO - Starting ETL pipeline - PostgreSQL
+2025-09-26 16:59:53,910 - INFO - Process initiated at: 2025-09-26 16:59:53
+2025-09-26 16:59:53,911 - INFO - Phase 1: Data Extraction
+2025-09-26 16:59:54,165 - INFO - Extracted (2, 5000, 222785) rows from JSON and CSVs
+2025-09-26 16:59:54,166 - INFO - Phase 2: Data Transformation
+2025-09-26 16:59:54,966 - INFO - Transformation completed (CSV→JSON + cleaning)
+2025-09-26 16:59:54,967 - INFO - Back-conversion JSON→CSV done
+2025-09-26 16:59:54,967 - INFO - Phase 3: Data Validation
+2025-09-26 16:59:54,969 - INFO - Validation passed ✅
+2025-09-26 16:59:54,969 - INFO - Phase 4: PostgreSQL Loading
+2025-09-26 17:00:05,868 - INFO - Incremental load completed
+2025-09-26 17:00:05,868 - INFO - 🎉 ETL pipeline finished successfully
+2025-09-26 17:00:05,868 - INFO - ETL Pipeline Completed Successfully
+2025-09-26 17:00:05,869 - INFO - ==================================================
+2025-09-26 17:00:05,869 - INFO - PERFORMANCE SUMMARY:
+2025-09-26 17:00:05,870 - INFO -   Total pipeline duration: 11.96s
+2025-09-26 17:00:05,870 - INFO -   Extraction phase: 255.37ms (2.1%)
+2025-09-26 17:00:05,870 - INFO -   Transformation phase: 799.94ms (6.7%)
+2025-09-26 17:00:05,870 - INFO -   Validation phase: 1.82ms (0.0%)
+2025-09-26 17:00:05,871 - INFO -   PostgreSQL load: 10.90s (91.1%)
+2025-09-26 17:00:05,871 - INFO -   Total records processed: 227788
+2025-09-26 17:00:05,871 - INFO -   Overall throughput: 19048.2 records/second
+2025-09-26 17:00:05,871 - INFO - ==================================================
