@@ -1,0 +1,52 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: etl_mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root123
+      MYSQL_DATABASE: streaming_db
+      MYSQL_USER: etluser
+      MYSQL_PASSWORD: etlpass
+    ports:
+      - "3307:3306"  # CAMBIADO: 3307 en lugar de 3306
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build: ./backend
+    container_name: etl_backend
+    ports:
+      - "4000:4000"
+    environment:
+      NODE_ENV: development
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_USER: etluser
+      DB_PASSWORD: etlpass
+      DB_NAME: streaming_db
+    volumes:
+      - ./backend/src:/app/src
+      - ./backend/data:/app/data
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  frontend:
+    build: ./frontend
+    container_name: etl_frontend
+    ports:
+      - "3000:5173"
+    environment:
+      VITE_API_URL: http://localhost:4000/api
+    volumes:
+      - ./frontend/src:/app/src
+    depends_on:
+      - backend
+
+volumes:
+  mysql_data:
