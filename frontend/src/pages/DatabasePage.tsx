@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 
 interface Column {
   name: string;
@@ -33,13 +33,13 @@ interface DatabaseSchema {
   };
 }
 
-// Posiciones predefinidas para las tablas
+// Posiciones fijas optimizadas para vista completa
 const TABLE_POSITIONS: Record<string, { x: number; y: number }> = {
-  subscription_types: { x: 50, y: 50 },
-  device_types: { x: 50, y: 280 },
-  users: { x: 400, y: 165 },
-  viewing_sessions: { x: 750, y: 165 },
-  user_metrics: { x: 1100, y: 165 },
+  subscription_types: { x: 40, y: 60 },
+  device_types: { x: 40, y: 260 },
+  users: { x: 360, y: 160 },
+  viewing_sessions: { x: 680, y: 160 },
+  user_metrics: { x: 1000, y: 160 },
 };
 
 export default function DatabasePage() {
@@ -48,11 +48,6 @@ export default function DatabasePage() {
   const [error, setError] = useState<string | null>(null);
   const [selectedTable, setSelectedTable] = useState<string | null>(null);
   const [hoveredRelation, setHoveredRelation] = useState<string | null>(null);
-  const svgRef = useRef<SVGSVGElement>(null);
-  const [zoom, setZoom] = useState(0.9);
-  const [pan, setPan] = useState({ x: 0, y: 0 });
-  const [isPanning, setIsPanning] = useState(false);
-  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
 
   useEffect(() => {
     fetchSchema();
@@ -82,35 +77,6 @@ export default function DatabasePage() {
       case 'UNI': return 'UK';
       default: return '';
     }
-  };
-
-  const handleMouseDown = (e: React.MouseEvent) => {
-    if (e.button === 0 && !e.defaultPrevented) {
-      setIsPanning(true);
-      setDragStart({ x: e.clientX - pan.x, y: e.clientY - pan.y });
-      e.preventDefault();
-    }
-  };
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (isPanning) {
-      setPan({
-        x: e.clientX - dragStart.x,
-        y: e.clientY - dragStart.y
-      });
-      e.preventDefault();
-    }
-  };
-
-  const handleMouseUp = (e: React.MouseEvent) => {
-    setIsPanning(false);
-    e.preventDefault();
-  };
-
-  const handleWheel = (e: React.WheelEvent) => {
-    const delta = e.deltaY > 0 ? 0.9 : 1.1;
-    setZoom(prev => Math.min(Math.max(0.3, prev * delta), 2));
-    e.preventDefault();
   };
 
   if (loading) {
@@ -166,51 +132,14 @@ export default function DatabasePage() {
             </div>
           </div>
         </div>
-
-        {/* Controls */}
-        <div className="mt-4 flex items-center gap-4">
-          <button 
-            onClick={() => { setZoom(0.9); setPan({ x: 0, y: 0 }); }}
-            className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50 text-sm font-medium"
-          >
-            Reset View
-          </button>
-          <div className="flex items-center gap-2">
-            <button 
-              onClick={() => setZoom(prev => Math.min(2, prev * 1.2))}
-              className="w-8 h-8 border border-gray-300 rounded hover:bg-gray-50 flex items-center justify-center"
-            >
-              +
-            </button>
-            <span className="text-sm text-gray-600 w-12 text-center">{Math.round(zoom * 100)}%</span>
-            <button 
-              onClick={() => setZoom(prev => Math.max(0.3, prev * 0.8))}
-              className="w-8 h-8 border border-gray-300 rounded hover:bg-gray-50 flex items-center justify-center"
-            >
-              −
-            </button>
-          </div>
-        </div>
       </div>
 
-      {/* ER Diagram */}
-      <div 
-        className="flex-1 relative overflow-hidden bg-gray-50"
-        style={{ cursor: isPanning ? 'grabbing' : 'grab' }}
-        onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUp}
-        onMouseLeave={handleMouseUp}
-        onWheel={handleWheel}
-      >
+      {/* ER Diagram - Fixed size, no zoom */}
+      <div className="flex-1 relative overflow-auto bg-gray-50">
         <svg 
-          ref={svgRef}
-          width="100%" 
-          height="100%" 
-          style={{ 
-            transform: `scale(${zoom}) translate(${pan.x / zoom}px, ${pan.y / zoom}px)`,
-            transformOrigin: '0 0'
-          }}
+          width="1320" 
+          height="600"
+          className="min-w-full"
         >
           {/* Grid Background */}
           <defs>
@@ -218,7 +147,7 @@ export default function DatabasePage() {
               <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#E5E7EB" strokeWidth="0.5"/>
             </pattern>
           </defs>
-          <rect width="2000" height="1000" fill="url(#grid)" />
+          <rect width="1320" height="600" fill="url(#grid)" />
 
           {/* Draw Relationships */}
           {schema.tables.map(table => 
@@ -289,10 +218,7 @@ export default function DatabasePage() {
                 key={table.name}
                 transform={`translate(${pos.x}, ${pos.y})`}
                 className="cursor-pointer"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setSelectedTable(isSelected ? null : table.name);
-                }}
+                onClick={() => setSelectedTable(isSelected ? null : table.name)}
               >
                 {/* Table Shadow */}
                 <rect
@@ -425,7 +351,7 @@ export default function DatabasePage() {
             <span><span className="font-semibold">UK</span> = Unique Key</span>
           </div>
           <div className="text-gray-500">
-            Use mouse wheel to zoom • Drag to pan • Click tables to highlight
+            Click tables to highlight • Hover relationships to see details
           </div>
         </div>
       </div>
