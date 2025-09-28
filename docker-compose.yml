@@ -12,9 +12,27 @@ services:
       - mysql_data:/var/lib/mysql
       - ./backend/src/models/schema.sql:/docker-entrypoint-initdb.d/0_schema.sql:ro
     ports:
-      - "3307:3306"            # host:container (usa 3307 en tu host)
+      - "3307:3306"
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-proot123"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    restart: unless-stopped
+
+  mongodb:
+    container_name: etl_mongodb
+    image: mongo:7.0
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: root123
+      MONGO_INITDB_DATABASE: streaming_nosql
+    volumes:
+      - mongo_data:/data/db
+    ports:
+      - "27017:27017"
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
       interval: 5s
       timeout: 5s
       retries: 20
@@ -25,22 +43,31 @@ services:
     build:
       context: ./backend
     environment:
-      # DB (siempre 3306 dentro de la red Docker)
+      # MySQL
       MYSQL_HOST: etl_mysql
       MYSQL_PORT: "3306"
       MYSQL_USER: root
       MYSQL_PASSWORD: root123
       MYSQL_DB: streaming_db
-      # CSVs (sin límites)
+      # MongoDB
+      MONGO_URI: mongodb://root:root123@etl_mongodb:27017/streaming_nosql?authSource=admin
+      # Data files
       USERS_CSV: /app/data/users.csv
       SESSIONS_CSV: /app/data/viewing_sessions.csv
-      # Puerto backend
+      CONTENT_JSON: /app/data/content.json
+      # Port
       PORT: "4000"
     volumes:
-      - ./backend/data:/app/data:ro   # CSVs reales
-      - ./backend/src:/app/src        # hot-reload
+      - ./backend/data:/app/data:ro
+      - ./data/norelational/content.json:/app/data/content.json:ro
+      - ./backend/src:/app/src
+      - ./backend/package.json:/app/package.json:ro
+      - ./backend/nodemon.json:/app/nodemon.json:ro
+      - ./backend/tsconfig.json:/app/tsconfig.json:ro
     depends_on:
       mysql:
+        condition: service_healthy
+      mongodb:
         condition: service_healthy
     ports:
       - "4000:4000"
@@ -52,12 +79,21 @@ services:
       context: ./frontend
     environment:
       VITE_API_URL: http://localhost:4000/api
+    volumes:
+      - ./frontend/src:/app/src
+      - ./frontend/index.html:/app/index.html:ro
+      - ./frontend/vite.config.ts:/app/vite.config.ts:ro
+      - ./frontend/tsconfig.json:/app/tsconfig.json:ro
+      - ./frontend/tsconfig.node.json:/app/tsconfig.node.json:ro
+      - ./frontend/tailwind.config.js:/app/tailwind.config.js:ro
+      - ./frontend/postcss.config.js:/app/postcss.config.js:ro
+      - ./frontend/package.json:/app/package.json:ro
     ports:
-      - "3000:5173"            # abre el frontend en http://localhost:3000
+      - "3000:5173"
     depends_on:
       - backend
     restart: unless-stopped
 
 volumes:
   mysql_data:
-
+  mongo_data:

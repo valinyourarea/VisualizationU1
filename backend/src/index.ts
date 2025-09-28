@@ -1,8 +1,9 @@
-// ============= backend/src/index.ts =============
+// backend/src/index.ts
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import routes from './routes';
+import { connectMongoDB } from './config/mongodb';
 
 dotenv.config();
 
@@ -21,6 +22,21 @@ app.get('/health', (req, res) => {
   res.json({ status: 'OK', timestamp: new Date().toISOString() });
 });
 
-app.listen(PORT, () => {
-  console.log(`ETL Backend running on port ${PORT}`);
-});
+// Start server and connect to databases
+async function startServer() {
+  try {
+    // Connect to MongoDB
+    await connectMongoDB();
+    console.log('MongoDB connected successfully');
+    
+    // Start Express server
+    app.listen(PORT, () => {
+      console.log(`ETL Backend running on port ${PORT}`);
+    });
+  } catch (error) {
+    console.error('Failed to start server:', error);
+    process.exit(1);
+  }
+}
+
+startServer();

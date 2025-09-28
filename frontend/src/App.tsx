@@ -3,6 +3,7 @@ import { Sidebar } from './components/Layout/Sidebar';
 import { ETLPage } from './pages/ETLPage';
 import { AnalyticsPage } from './pages/AnalyticsPage';
 import DatabasePage from './pages/DatabasePage';
+import MongoDBPage from './pages/MongoDBPage';
 import UsersPage from './pages/UsersPage';
 import './index.css';
 
@@ -17,6 +18,8 @@ function App() {
         return <AnalyticsPage />;
       case 'database':
         return <DatabasePage />;
+      case 'mongodb':
+        return <MongoDBPage />;
       case 'users':
         return <UsersPage />;
       default:
