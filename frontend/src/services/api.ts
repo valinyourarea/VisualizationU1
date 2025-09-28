@@ -1,8 +1,7 @@
-// src/services/api.ts
+// frontend/src/services/api.ts
+
 const DEFAULT_API_URL = 'http://localhost:4000/api';
 const API_URL = (import.meta.env?.VITE_API_URL as string) || DEFAULT_API_URL;
-
-// Activa logs solo en dev
 const DEBUG = import.meta.env?.DEV === true;
 
 function joinUrl(base: string, endpoint: string) {
@@ -10,13 +9,6 @@ function joinUrl(base: string, endpoint: string) {
   const e = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
   return `${b}${e}`;
 }
-
-export type ApiErrorInfo = {
-  url: string;
-  status: number;
-  statusText: string;
-  body?: unknown;
-};
 
 export class ApiService {
   private baseURL: string;
@@ -26,32 +18,37 @@ export class ApiService {
   }
 
   private async parseResponse(res: Response) {
-    // 204 No Content → null
+    // 204 No Content
     if (res.status === 204) return null;
 
     const ct = res.headers.get('content-type') || '';
 
-    // Si es JSON, intenta parsear como JSON
+    // JSON explícito
     if (ct.includes('application/json')) {
-      return await res.json();
+      return res.json();
     }
 
-    // Si no declara JSON, intenta JSON y si falla, devuelve texto
+    // Intenta texto → JSON (por si el server no setea content-type)
     const text = await res.text();
     try {
       return text ? JSON.parse(text) : null;
     } catch {
-      return text; // podría ser HTML, texto plano, etc.
+      return text;
     }
   }
 
-  private async request(endpoint: string, options: RequestInit = {}, timeoutMs = 15000) {
+  private async request(
+    endpoint: string,
+    options: RequestInit = {},
+    timeoutMs = 15000
+  ) {
     const url = joinUrl(this.baseURL, endpoint);
 
+    // AbortController para timeout
     const controller = new AbortController();
-    const id = setTimeout(() => controller.abort(), timeoutMs);
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
 
-    // Solo enviamos Content-Type si hay body
+    // Content-Type solo si enviamos body
     const headers: Record<string, string> = {
       ...(options.body ? { 'Content-Type': 'application/json' } : {}),
       ...(options.headers as Record<string, string> | undefined),
@@ -73,27 +70,26 @@ export class ApiService {
       if (DEBUG) console.info('[API] ←', res.status, res.statusText, 'for', url);
 
       if (!res.ok) {
-        const err: ApiErrorInfo = {
-          url,
-          status: res.status,
-          statusText: res.statusText,
-          body: payload,
-        };
-        if (DEBUG) console.error('[API] error payload:', err);
-        throw new Error(`HTTP ${err.status} ${err.statusText} @ ${url}`);
+        if (DEBUG) {
+          console.error('[API] error payload:', {
+            url,
+            status: res.status,
+            statusText: res.statusText,
+            body: payload,
+          });
+        }
+        throw new Error(`HTTP ${res.status} ${res.statusText} @ ${url}`);
       }
 
       return payload;
     } catch (err: any) {
       if (err?.name === 'AbortError') {
-        const msg = `Timeout after ${timeoutMs}ms @ ${url}`;
-        if (DEBUG) console.error('[API] abort:', msg);
-        throw new Error(msg);
+        throw new Error(`Timeout after ${timeoutMs}ms @ ${url}`);
       }
       if (DEBUG) console.error('[API] request failed:', err);
       throw err;
     } finally {
-      clearTimeout(id);
+      clearTimeout(timer);
     }
   }
 
