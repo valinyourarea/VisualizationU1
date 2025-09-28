@@ -1,52 +1,63 @@
+name: streaming-etl
+
 services:
   mysql:
-    image: mysql:8.0
     container_name: etl_mysql
+    image: mysql:8.0
     environment:
       MYSQL_ROOT_PASSWORD: root123
       MYSQL_DATABASE: streaming_db
-      MYSQL_USER: etluser
-      MYSQL_PASSWORD: etlpass
-    ports:
-      - "3307:3306"  # CAMBIADO: 3307 en lugar de 3306
+    command: ["--secure-file-priv=/var/lib/mysql-files"]
     volumes:
       - mysql_data:/var/lib/mysql
+      - ./backend/src/models/schema.sql:/docker-entrypoint-initdb.d/0_schema.sql:ro
+    ports:
+      - "3307:3306"            # host:container (usa 3307 en tu host)
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      interval: 10s
+      test: ["CMD", "mysqladmin", "ping", "-proot123"]
+      interval: 5s
       timeout: 5s
-      retries: 5
+      retries: 20
+    restart: unless-stopped
 
   backend:
-    build: ./backend
     container_name: etl_backend
-    ports:
-      - "4000:4000"
+    build:
+      context: ./backend
     environment:
-      NODE_ENV: development
-      DB_HOST: mysql
-      DB_PORT: 3306
-      DB_USER: etluser
-      DB_PASSWORD: etlpass
-      DB_NAME: streaming_db
+      # DB (siempre 3306 dentro de la red Docker)
+      MYSQL_HOST: etl_mysql
+      MYSQL_PORT: "3306"
+      MYSQL_USER: root
+      MYSQL_PASSWORD: root123
+      MYSQL_DB: streaming_db
+      # CSVs (sin límites)
+      USERS_CSV: /app/data/users.csv
+      SESSIONS_CSV: /app/data/viewing_sessions.csv
+      # Puerto backend
+      PORT: "4000"
     volumes:
-      - ./backend/src:/app/src
-      - ./backend/data:/app/data
+      - ./backend/data:/app/data:ro   # CSVs reales
+      - ./backend/src:/app/src        # hot-reload
     depends_on:
       mysql:
         condition: service_healthy
+    ports:
+      - "4000:4000"
+    restart: unless-stopped
 
   frontend:
-    build: ./frontend
     container_name: etl_frontend
-    ports:
-      - "3000:5173"
+    build:
+      context: ./frontend
     environment:
       VITE_API_URL: http://localhost:4000/api
-    volumes:
-      - ./frontend/src:/app/src
+    ports:
+      - "3000:5173"            # abre el frontend en http://localhost:3000
     depends_on:
       - backend
+    restart: unless-stopped
 
 volumes:
   mysql_data:
+

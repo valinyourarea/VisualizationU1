@@ -1,236 +1,247 @@
-import React from 'react';
-import { ETLDag, ETLNode } from '../../types';
+// frontend/src/components/ETL/DAGFlow.tsx
+import React, { useMemo } from 'react';
+import type { ETLDag, DagNode } from '../../hooks/useETL';
+import { NodeStatus } from './NodeStatus';
 
-interface DAGFlowProps {
-  dag: ETLDag;
+/** -------------------- Alias y normalización -------------------- */
+const CANONICAL: Record<string, string[]> = {
+  validate_files: ['validate_files', 'validate'],
+  create_schema: ['create_schema', 'schema'],
+  load_dimensions: ['load_dimensions', 'dims', 'dimensions', 'load_dims'],
+  process_users: ['process_users', 'users'],
+  process_sessions: ['process_sessions', 'sessions'],
+  create_aggregations: ['create_aggregations', 'aggs', 'aggregations', 'create_aggs'],
+  validate_data: ['validate_data', 'quality', 'data_quality'],
+  generate_statistics: ['generate_statistics', 'generate_stats', 'stats', 'finish', 'finalize'],
+};
+
+function toCanon(id: string): string {
+  const s = (id ?? '').toString().toLowerCase();
+  for (const [canon, aliases] of Object.entries(CANONICAL)) {
+    if (aliases.includes(s)) return canon;
+  }
+  return s;
 }
 
-/**
- * Fixes:
- * - Fallback seguro: nodes = [] si dag.nodes no existe.
- * - Sin escala en hover (evita que tape otras secciones).
- * - Wrapper con overflow-y-hidden y svg con overflow: hidden.
- */
-export const DAGFlow: React.FC<DAGFlowProps> = ({ dag }) => {
-  const nodeWidth = 180;
-  const nodeHeight = 60;
-  const horizontalSpacing = 240;
+/** Orden "ideal" del pipeline (por clave canónica) */
+const PIPELINE_ORDER: string[] = [
+  'validate_files',
+  'create_schema',
+  'load_dimensions',
+  'process_users',
+  'process_sessions',
+  'create_aggregations',
+  'validate_data',
+  'generate_statistics',
+];
 
-  // Fallback local
-  const nodes = Array.isArray(dag?.nodes) ? dag.nodes : [];
+/** -------------------- Layout estático -------------------- */
+/** Posiciones por clave canónica. Se usa alias para encontrar éstas. */
+const STATIC_POS: Record<string, { x: number; y: number }> = {
+  validate_files: { x: 120, y: 120 },
+  create_schema: { x: 360, y: 120 },
+  load_dimensions: { x: 600, y: 120 },
+  process_users: { x: 840, y: 120 },
+  process_sessions: { x: 1080, y: 120 },
+  create_aggregations: { x: 1320, y: 120 },
+  validate_data: { x: 1560, y: 120 },
+  generate_statistics: { x: 1800, y: 120 },
+};
 
-  // Layout absoluto
-  const nodePositions: Record<string, { x: number; y: number }> = {
-    validate_files: { x: 50, y: 100 },
-    create_schema: { x: 50 + horizontalSpacing, y: 100 },
-    load_dimensions: { x: 50 + horizontalSpacing * 2, y: 100 },
-    process_users: { x: 50 + horizontalSpacing * 3, y: 50 },
-    process_sessions: { x: 50 + horizontalSpacing * 3, y: 150 },
-    create_aggregations: { x: 50 + horizontalSpacing * 4, y: 100 },
-    validate_data: { x: 50 + horizontalSpacing * 5, y: 100 },
-    generate_stats: { x: 50 + horizontalSpacing * 6, y: 100 },
-  };
+type PositionedNode = DagNode & {
+  canon: string;
+  x: number;
+  y: number;
+};
 
-  const getNodeColor = (status: ETLNode['status']) => {
-    switch (status) {
-      case 'success': return '#10B981';
-      case 'running': return '#3B82F6';
-      case 'failed':
-      case 'error':   return '#EF4444';
-      case 'skipped': return '#9CA3AF';
-      default:        return '#E5E7EB'; // pending/idle
-    }
-  };
+type Edge = { from: string; to: string };
 
-  const getNodeBorderStyle = (status: ETLNode['status']) => {
-    if (status === 'running') {
-      return { strokeDasharray: '5,5', animation: 'dash 1s linear infinite' } as React.SVGProps<SVGRectElement>;
-    }
-    return {};
-  };
+/** Tamaño visual de los "rectángulos" de nodo */
+const NODE_W = 220;
+const NODE_H = 56;
 
-  const drawConnections = () => {
-    const connections: JSX.Element[] = [];
-    nodes.forEach((node) => {
-      (node.dependencies || []).forEach((depId) => {
-        const fromPos = nodePositions[depId];
-        const toPos   = nodePositions[node.id];
-        if (!fromPos || !toPos) return;
+/** Color por estado */
+function statusColor(s: string) {
+  const k = (s ?? '').toLowerCase();
+  if (k === 'success' || k === 'completed' || k === 'complete') return 'bg-emerald-500';
+  if (k === 'running') return 'bg-blue-500';
+  if (k === 'error' || k === 'failed' || k === 'fail') return 'bg-red-500';
+  return 'bg-slate-300';
+}
 
-        const startX = fromPos.x + nodeWidth;
-        const startY = fromPos.y + nodeHeight / 2;
-        const endX   = toPos.x;
-        const endY   = toPos.y + nodeHeight / 2;
-        const midX   = (startX + endX) / 2;
+/** -------------------- Componente -------------------- */
+export function DAGFlow({ dag }: { dag: ETLDag }) {
+  const { placed, edges } = useMemo(() => {
+    const groupLabel = `[DAGFlow] render (dag.id=${dag?.id ?? '∅'} | status=${dag?.status ?? '∅'})`;
+    console.groupCollapsed(groupLabel);
 
-        const path = `M ${startX} ${startY} C ${midX} ${startY}, ${midX} ${endY}, ${endX} ${endY}`;
+    const rawNodes: DagNode[] = Array.isArray(dag?.nodes) ? dag.nodes : [];
+    console.info('[DAGFlow] nodos entrantes:', rawNodes);
 
-        connections.push(
-          <g key={`${depId}-${node.id}`}>
-            <path d={path} stroke="#D1D5DB" strokeWidth="2" fill="none" />
-            <circle cx={endX} cy={endY} r="4" fill="#9CA3AF" />
-          </g>
-        );
-      });
+    // Normaliza a canónica + agrega posición si existe
+    const normalized: PositionedNode[] = rawNodes.map((n) => {
+      const canon = toCanon(n.id);
+      return {
+        ...n,
+        canon,
+        x: STATIC_POS[canon]?.x ?? Number.NaN,
+        y: STATIC_POS[canon]?.y ?? Number.NaN,
+      };
     });
-    return connections;
-  };
 
-  if (nodes.length === 0) {
-    return (
-      <div className="bg-white rounded-lg border border-gray-200 p-6">
-        <h3 className="text-lg font-medium text-gray-900 mb-2">ETL Pipeline DAG</h3>
-        <p className="text-sm text-gray-500">No nodes to display.</p>
-      </div>
+    // Filtra los que tengan posición conocida; loguea los que no
+    const placedNodes: PositionedNode[] = [];
+    for (const n of normalized) {
+      if (!Number.isFinite(n.x) || !Number.isFinite(n.y)) {
+        console.warn('[DAGFlow] nodo sin posición asignada:', n.id, n.status, n);
+      } else {
+        placedNodes.push(n);
+      }
+    }
+    console.info('[DAGFlow] nodos posicionados:', placedNodes.map((n) => n.id));
+
+    // Mapa canónica -> id real presente
+    const canonToRealId = new Map<string, string>();
+    for (const n of placedNodes) canonToRealId.set(n.canon, n.id);
+
+    // Construir edges:
+    // 1) Si hay dependencies en algún nodo, las respetamos (normalizando canónicas).
+    // 2) Si NO hay dependencies, generamos cadena secuencial según PIPELINE_ORDER.
+    const hasAnyDeps = rawNodes.some(
+      (n) => Array.isArray(n.dependencies) && n.dependencies.length > 0,
     );
-  }
+
+    const edgesSet = new Set<string>();
+    const edges: Edge[] = [];
+
+    if (hasAnyDeps) {
+      for (const n of rawNodes) {
+        const targetCanon = toCanon(n.id);
+        const targetReal = canonToRealId.get(targetCanon);
+        if (!targetReal) continue;
+
+        const deps = Array.isArray(n.dependencies) ? n.dependencies : [];
+        for (const d of deps) {
+          const depCanon = toCanon(d);
+          const depReal = canonToRealId.get(depCanon);
+          if (!depReal) continue;
+          const key = `${depReal}=>${targetReal}`;
+          if (!edgesSet.has(key)) {
+            edgesSet.add(key);
+            edges.push({ from: depReal, to: targetReal });
+          }
+        }
+      }
+    } else {
+      // Fallback secuencial en base al orden canónico para nodos presentes
+      const presentCanon = PIPELINE_ORDER.filter((c) => canonToRealId.has(c));
+      for (let i = 0; i < presentCanon.length - 1; i++) {
+        const aReal = canonToRealId.get(presentCanon[i])!;
+        const bReal = canonToRealId.get(presentCanon[i + 1])!;
+        const key = `${aReal}=>${bReal}`;
+        if (!edgesSet.has(key)) {
+          edgesSet.add(key);
+          edges.push({ from: aReal, to: bReal });
+        }
+      }
+    }
+
+    console.info('[DAGFlow] conexiones dibujadas:', edges.length, edges);
+    console.groupEnd();
+
+    return { placed: placedNodes, edges };
+  }, [dag]);
+
+  // Contenedor ancho para permitir scroll horizontal si hace falta
+  const minCanvasWidth = 2000; // px
+  const minCanvasHeight = 260; // px
+
+  // Helper para buscar pos de un id
+  const getPos = (id: string) => {
+    const n = placed.find((p) => p.id === id);
+    return n ? { x: n.x, y: n.y } : { x: 0, y: 0 };
+  };
 
   return (
-    <div className="bg-white rounded-lg border border-gray-200 p-6">
-      <div className="mb-4 flex items-center justify-between">
-        <h3 className="text-lg font-medium text-gray-900">ETL Pipeline DAG</h3>
-        <div className="flex items-center space-x-4 text-sm">
-          <div className="flex items-center space-x-1"><div className="w-3 h-3 bg-gray-300 rounded" /><span className="text-gray-600">Pending</span></div>
-          <div className="flex items-center space-x-1"><div className="w-3 h-3 bg-blue-500 rounded" /><span className="text-gray-600">Running</span></div>
-          <div className="flex items-center space-x-1"><div className="w-3 h-3 bg-green-500 rounded" /><span className="text-gray-600">Success</span></div>
-          <div className="flex items-center space-x-1"><div className="w-3 h-3 bg-red-500 rounded" /><span className="text-gray-600">Failed</span></div>
-        </div>
-      </div>
-
-      {/* overflow-x para scroll horizontal, overflow-y hidden para que no tape otras secciones */}
-      <div className="overflow-x-auto overflow-y-hidden">
-        <svg width="1400" height="250" className="dag-svg block" style={{ overflow: 'hidden' as any }}>
-          <style>
-            {`
-              @keyframes dash { to { stroke-dashoffset: -10; } }
-
-              /* Quitamos la escala que causaba el solapamiento */
-              .node-group { cursor: pointer; }
-              .node-rect { transition: filter .2s, stroke-width .2s; }
-              .node-group:hover .node-rect {
-                filter: brightness(0.95);
-                stroke-width: 3;
-              }
-
-              .running-node { animation: pulse 2s ease-in-out infinite; }
-              @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:.85; } }
-            `}
-          </style>
-
-          {/* Conexiones detrás */}
-          {drawConnections()}
+    <div className="relative border rounded-lg bg-white/70 shadow-sm">
+      {/* Grid/fondo */}
+      <div
+        className="absolute inset-0 bg-[linear-gradient(to_right,#f1f5f9_1px,transparent_1px),linear-gradient(to_bottom,#f1f5f9_1px,transparent_1px)]"
+        style={{ backgroundSize: '24px 24px' }}
+      />
+      <div className="relative overflow-x-auto overflow-y-hidden" style={{ minHeight: minCanvasHeight }}>
+        <div style={{ minWidth: minCanvasWidth, height: minCanvasHeight, position: 'relative' }}>
+          {/* Conexiones */}
+          <svg width={minCanvasWidth} height={minCanvasHeight} className="absolute inset-0 pointer-events-none">
+            {edges.map((e, idx) => {
+              const a = getPos(e.from);
+              const b = getPos(e.to);
+              // Línea horizontal simple (rectángulos centrados verticalmente)
+              const y = a.y;
+              const x1 = a.x + NODE_W / 2;
+              const x2 = b.x - NODE_W / 2;
+              return (
+                <line
+                  key={`${e.from}_${e.to}_${idx}`}
+                  x1={x1}
+                  y1={y}
+                  x2={x2}
+                  y2={y}
+                  stroke="#CBD5E1"
+                  strokeWidth={2}
+                  markerEnd="url(#arrow)"
+                />
+              );
+            })}
+            {/* Flecha */}
+            <defs>
+              <marker id="arrow" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+                <path d="M 0 0 L 10 5 L 0 10 z" fill="#CBD5E1" />
+              </marker>
+            </defs>
+          </svg>
 
           {/* Nodos */}
-          {nodes.map((node) => {
-            const pos = nodePositions[node.id];
-            if (!pos) return null;
+          {placed.map((n) => (
+            <div
+              key={n.id}
+              className="absolute rounded-xl border bg-white shadow-sm transition-all"
+              style={{
+                left: n.x - NODE_W / 2,
+                top: n.y - NODE_H / 2,
+                width: NODE_W,
+                height: NODE_H,
+              }}
+            >
+              <div className="flex items-center gap-2 h-full px-4">
+                <span className={`inline-flex h-2.5 w-2.5 rounded-full ${statusColor(n.status)}`} />
+                <div className="flex flex-col">
+                  <span className="text-[13px] font-medium text-slate-700">{n.name || n.id}</span>
+                  <span className="text-[11px] text-slate-400 capitalize">{n.status || 'pending'}</span>
+                </div>
+              </div>
+            </div>
+          ))}
 
-            const isRunning = node.status === 'running';
-            const startTime = (node as any)?.startTime as string | undefined;
-            const endTime   = (node as any)?.endTime   as string | undefined;
-
-            return (
-              <g
-                key={node.id}
-                className={`node-group ${isRunning ? 'running-node' : ''}`}
-                transform={`translate(${pos.x}, ${pos.y})`}
-              >
-                <rect
-                  className="node-rect"
-                  width={nodeWidth}
-                  height={nodeHeight}
-                  rx="8"
-                  fill={getNodeColor(node.status)}
-                  stroke={node.status === 'running' ? '#3B82F6' : '#D1D5DB'}
-                  strokeWidth="2"
-                  {...getNodeBorderStyle(node.status)}
-                />
-
-                {/* Iconos por estado */}
-                <g transform="translate(10, 20)">
-                  {node.status === 'success' && (
-                    <svg width="20" height="20" viewBox="0 0 20 20" fill="white">
-                      <path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"/>
-                    </svg>
-                  )}
-                  {node.status === 'running' && (
-                    <svg width="20" height="20" viewBox="0 0 20 20" fill="white">
-                      <circle cx="10" cy="10" r="8" stroke="white" strokeWidth="2" fill="none" strokeDasharray="4 2">
-                        <animateTransform attributeName="transform" type="rotate" from="0 10 10" to="360 10 10" dur="2s" repeatCount="indefinite" />
-                      </circle>
-                    </svg>
-                  )}
-                  {(node.status === 'failed' || node.status === 'error') && (
-                    <svg width="20" height="20" viewBox="0 0 20 20" fill="white">
-                      <path d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"/>
-                    </svg>
-                  )}
-                  {node.status === 'pending' && (
-                    <svg width="20" height="20" viewBox="0 0 20 20" fill="#9CA3AF">
-                      <circle cx="10" cy="10" r="8" stroke="#9CA3AF" strokeWidth="2" fill="none" />
-                    </svg>
-                  )}
-                </g>
-
-                {/* Título */}
-                <text
-                  x={nodeWidth / 2}
-                  y={nodeHeight / 2}
-                  textAnchor="middle"
-                  dominantBaseline="middle"
-                  fill="white"
-                  fontSize="13"
-                  fontWeight="500"
-                  pointerEvents="none"
-                >
-                  {node.name}
-                </text>
-
-                {/* Duración opcional */}
-                {startTime && endTime && (
-                  <text
-                    x={nodeWidth / 2}
-                    y={nodeHeight - 8}
-                    textAnchor="middle"
-                    fill="white"
-                    fontSize="10"
-                    opacity="0.8"
-                  >
-                    {((new Date(endTime).getTime() - new Date(startTime).getTime()) / 1000).toFixed(1)}s
-                  </text>
-                )}
-              </g>
-            );
-          })}
-        </svg>
-      </div>
-
-      {/* Resumen */}
-      <div className="mt-6 grid grid-cols-4 gap-4">
-        <div className="bg-gray-50 rounded-lg p-3">
-          <div className="text-sm text-gray-600">Total Nodes</div>
-          <div className="text-2xl font-semibold text-gray-900">{nodes.length}</div>
-        </div>
-        <div className="bg-green-50 rounded-lg p-3">
-          <div className="text-sm text-green-600">Completed</div>
-          <div className="text-2xl font-semibold text-green-900">
-            {nodes.filter(n => n.status === 'success').length}
-          </div>
-        </div>
-        <div className="bg-blue-50 rounded-lg p-3">
-          <div className="text-sm text-blue-600">Running</div>
-          <div className="text-2xl font-semibold text-blue-900">
-            {nodes.filter(n => n.status === 'running').length}
-          </div>
-        </div>
-        <div className="bg-red-50 rounded-lg p-3">
-          <div className="text-sm text-red-600">Failed</div>
-          <div className="text-2xl font-semibold text-red-900">
-            {nodes.filter(n => n.status === 'failed' || n.status === 'error').length}
+          {/* Leyenda de estados */}
+          <div className="absolute right-4 top-3 flex items-center gap-4 rounded-md border bg-white/90 px-3 py-1.5 text-[12px] text-slate-600">
+            <div className="flex items-center gap-1">
+              <span className="h-2.5 w-2.5 rounded-full bg-slate-300" /> Pending
+            </div>
+            <div className="flex items-center gap-1">
+              <span className="h-2.5 w-2.5 rounded-full bg-blue-500" /> Running
+            </div>
+            <div className="flex items-center gap-1">
+              <span className="h-2.5 w-2.5 rounded-full bg-emerald-500" /> Success
+            </div>
+            <div className="flex items-center gap-1">
+              <span className="h-2.5 w-2.5 rounded-full bg-red-500" /> Failed
+            </div>
           </div>
         </div>
       </div>
     </div>
   );
-};
+}
+
 

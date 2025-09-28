@@ -1,24 +1,14 @@
-// ============= backend/src/config/database.ts =============
-import mysql from 'mysql2/promise';
+import 'dotenv/config';
+import type { PoolOptions } from 'mysql2'; // <- tipo correcto para el pool
 
-export const dbConfig = {
-  host: process.env.DB_HOST || 'mysql',
-  port: parseInt(process.env.DB_PORT || '3306'),
-  user: process.env.DB_USER || 'etluser',
-  password: process.env.DB_PASSWORD || 'etlpass',
-  database: process.env.DB_NAME || 'streaming_db',
+export const dbConfig: PoolOptions = {
+  host: process.env.MYSQL_HOST || 'etl_mysql',
+  user: process.env.MYSQL_USER || 'root',
+  password: process.env.MYSQL_PASSWORD || 'root123',
+  database: process.env.MYSQL_DB || 'streaming_db',
+  port: Number(process.env.MYSQL_PORT || 3306),
   waitForConnections: true,
   connectionLimit: 10,
-  queueLimit: 0
-};
-
-export const createConnection = async () => {
-  try {
-    const pool = mysql.createPool(dbConfig);
-    console.log('Database connection pool created');
-    return pool;
-  } catch (error) {
-    console.error('Failed to create database connection:', error);
-    throw error;
-  }
+  queueLimit: 0,
+  dateStrings: true,
 };

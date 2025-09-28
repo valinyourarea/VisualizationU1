@@ -1,399 +1,524 @@
 import fs from 'fs';
+import path from 'path';
 import csv from 'csv-parser';
 import mysql from 'mysql2/promise';
+import { dbConfig } from '../config/database';
 
-export interface ETLNode {
+type NodeStatus = 'pending' | 'running' | 'success' | 'failed';
+
+// Estructura que espera el frontend
+interface DagNode {
   id: string;
   name: string;
-  status: 'pending' | 'running' | 'success' | 'failed' | 'skipped';
-  startTime?: Date;
-  endTime?: Date;
+  status: NodeStatus;
+  dependencies?: string[];
+  startTime?: string;
+  endTime?: string;
   error?: string;
-  dependencies: string[];
 }
 
-export interface ETLDag {
+interface DagResponse {
   id: string;
   name: string;
-  status: 'idle' | 'running' | 'completed' | 'failed';
-  nodes: ETLNode[];
-  startTime?: Date;
-  endTime?: Date;
+  status: 'idle' | 'running' | 'success' | 'error';
+  nodes: DagNode[];
+  startTime?: string;
+  endTime?: string;
   currentNode?: string;
+  stats?: {
+    totalNodes: number;
+    completed: number;
+    running: number;
+    failed: number;
+  };
 }
+
+// Estructura interna del servicio
+interface InternalNode {
+  id: string;
+  name: string;
+  status: NodeStatus;
+  dependencies: string[];
+  startedAt?: number;
+  finishedAt?: number;
+  error?: string;
+}
+
+function nowSec() { return Date.now() / 1000; }
+function ms(start: number) { return Math.max(0, Math.round((nowSec() - start) * 10) / 10); }
 
 export class ETLService {
-  private connection: mysql.Pool | null = null;
-  private dag: ETLDag;
+  private pool = mysql.createPool(dbConfig);
+  private nodes: InternalNode[];
+  private dagStatus: 'idle' | 'running' | 'success' | 'error';
+  private dagStartTime?: Date;
+  private dagEndTime?: Date;
+  private currentNodeId?: string;
 
   constructor() {
-    this.dag = this.initializeDAG();
+    this.nodes = this.getInitialNodes();
+    this.dagStatus = 'idle';
   }
 
-  private initializeDAG(): ETLDag {
+  private getInitialNodes(): InternalNode[] {
+    return [
+      { 
+        id: 'validate_files', 
+        name: 'Validate CSV Files', 
+        status: 'pending',
+        dependencies: []
+      },
+      { 
+        id: 'create_schema', 
+        name: 'Create Database Schema', 
+        status: 'pending',
+        dependencies: ['validate_files']
+      },
+      { 
+        id: 'load_dimensions', 
+        name: 'Load Dimension Tables', 
+        status: 'pending',
+        dependencies: ['create_schema']
+      },
+      { 
+        id: 'process_users', 
+        name: 'Process Users Data', 
+        status: 'pending',
+        dependencies: ['load_dimensions']
+      },
+      { 
+        id: 'process_sessions', 
+        name: 'Process Sessions Data', 
+        status: 'pending',
+        dependencies: ['process_users']
+      },
+      { 
+        id: 'create_aggregations', 
+        name: 'Create Aggregations', 
+        status: 'pending',
+        dependencies: ['process_sessions']
+      },
+      { 
+        id: 'validate_data', 
+        name: 'Validate Data Quality', 
+        status: 'pending',
+        dependencies: ['create_aggregations']
+      },
+      { 
+        id: 'generate_stats', 
+        name: 'Generate Statistics', 
+        status: 'pending',
+        dependencies: ['validate_data']
+      },
+    ];
+  }
+
+  public getDAGStatus(): DagResponse {
+    const completed = this.nodes.filter(n => n.status === 'success').length;
+    const running = this.nodes.filter(n => n.status === 'running').length;
+    const failed = this.nodes.filter(n => n.status === 'failed').length;
+
+    // Convertir nodos internos al formato del frontend
+    const frontendNodes: DagNode[] = this.nodes.map(node => ({
+      id: node.id,
+      name: node.name,
+      status: node.status,
+      dependencies: node.dependencies.length > 0 ? node.dependencies : undefined,
+      startTime: node.startedAt ? new Date(node.startedAt * 1000).toISOString() : undefined,
+      endTime: node.finishedAt ? new Date(node.finishedAt * 1000).toISOString() : undefined,
+      error: node.error
+    }));
+
     return {
       id: 'streaming_etl_dag',
       name: 'Streaming Data ETL Pipeline',
-      status: 'idle',
-      nodes: [
-        {
-          id: 'validate_files',
-          name: 'Validate CSV Files',
-          status: 'pending',
-          dependencies: []
-        },
-        {
-          id: 'create_schema',
-          name: 'Create Database Schema',
-          status: 'pending',
-          dependencies: ['validate_files']
-        },
-        {
-          id: 'load_dimensions',
-          name: 'Load Dimension Tables',
-          status: 'pending',
-          dependencies: ['create_schema']
-        },
-        {
-          id: 'process_users',
-          name: 'Process Users Data',
-          status: 'pending',
-          dependencies: ['load_dimensions']
-        },
-        {
-          id: 'process_sessions',
-          name: 'Process Sessions Data',
-          status: 'pending',
-          dependencies: ['process_users']
-        },
-        {
-          id: 'create_aggregations',
-          name: 'Create Aggregations',
-          status: 'pending',
-          dependencies: ['process_sessions']
-        },
-        {
-          id: 'validate_data',
-          name: 'Validate Data Quality',
-          status: 'pending',
-          dependencies: ['create_aggregations']
-        },
-        {
-          id: 'generate_stats',
-          name: 'Generate Statistics',
-          status: 'pending',
-          dependencies: ['validate_data']
-        }
-      ]
+      status: this.dagStatus,
+      nodes: frontendNodes,
+      startTime: this.dagStartTime?.toISOString(),
+      endTime: this.dagEndTime?.toISOString(),
+      currentNode: this.currentNodeId,
+      stats: {
+        totalNodes: this.nodes.length,
+        completed,
+        running,
+        failed
+      }
     };
   }
 
-  async connectDB() {
-    if (!this.connection) {
-      this.connection = mysql.createPool({
-        host: process.env.DB_HOST || 'mysql',
-        port: parseInt(process.env.DB_PORT || '3306'),
-        user: process.env.DB_USER || 'etluser',
-        password: process.env.DB_PASSWORD || 'etlpass',
-        database: process.env.DB_NAME || 'streaming_db',
-        waitForConnections: true,
-        connectionLimit: 10
-      });
-    }
-    return this.connection;
+  public resetETL() {
+    this.nodes = this.getInitialNodes();
+    this.dagStatus = 'idle';
+    this.dagStartTime = undefined;
+    this.dagEndTime = undefined;
+    this.currentNodeId = undefined;
   }
 
-  async runETL() {
-    try {
-      this.dag = this.initializeDAG();
-      this.dag.status = 'running';
-      this.dag.startTime = new Date();
-
-      const pool = await this.connectDB();
-
-      // Execute nodes in order
-      await this.executeNode('validate_files', () => this.validateFiles());
-      await this.executeNode('create_schema', () => this.createSchema(pool));
-      await this.executeNode('load_dimensions', () => this.loadDimensions(pool));
-      await this.executeNode('process_users', () => this.processUsers(pool));
-      await this.executeNode('process_sessions', () => this.processSessions(pool));
-      await this.executeNode('create_aggregations', () => this.createAggregations(pool));
-      await this.executeNode('validate_data', () => this.validateData(pool));
-      await this.executeNode('generate_stats', () => this.generateStatistics(pool));
-
-      this.dag.status = 'completed';
-      this.dag.endTime = new Date();
-
-    } catch (error) {
-      this.dag.status = 'failed';
-      this.dag.endTime = new Date();
-      throw error;
-    }
-  }
-
-  private async executeNode(nodeId: string, task: () => Promise<void>) {
-    const node = this.dag.nodes.find(n => n.id === nodeId);
+  private setNodeStatus(nodeId: string, status: NodeStatus, error?: string) {
+    const node = this.nodes.find(n => n.id === nodeId);
     if (!node) return;
 
-    try {
-      node.status = 'running';
-      node.startTime = new Date();
-      this.dag.currentNode = nodeId;
-
-      await task();
-      
-      node.status = 'success';
-      node.endTime = new Date();
-    } catch (error) {
-      node.status = 'failed';
-      node.endTime = new Date();
-      node.error = error instanceof Error ? error.message : 'Unknown error';
-      
-      // Mark dependent nodes as skipped
-      this.markDependentsAsSkipped(nodeId);
-      
-      throw error;
-    }
-  }
-
-  private markDependentsAsSkipped(failedNodeId: string) {
-    this.dag.nodes.forEach(node => {
-      if (node.dependencies.includes(failedNodeId) && node.status === 'pending') {
-        node.status = 'skipped';
-      }
-    });
-  }
-
-  private async validateFiles(): Promise<void> {
-    const usersFile = '/app/data/users.csv';
-    const sessionsFile = '/app/data/viewing_sessions.csv';
-
-    if (!fs.existsSync(usersFile)) {
-      throw new Error('Users CSV file not found');
-    }
-    if (!fs.existsSync(sessionsFile)) {
-      throw new Error('Sessions CSV file not found');
-    }
-
-    // Simulate processing time
-    await this.sleep(1000);
-  }
-
-  private async createSchema(pool: mysql.Pool): Promise<void> {
-    const queries = [
-      'DROP TABLE IF EXISTS user_metrics',
-      'DROP TABLE IF EXISTS viewing_sessions',
-      'DROP TABLE IF EXISTS users',
-      'DROP TABLE IF EXISTS subscription_types',
-      'DROP TABLE IF EXISTS device_types',
-      
-      `CREATE TABLE subscription_types (
-        id INT PRIMARY KEY AUTO_INCREMENT,
-        name VARCHAR(50) UNIQUE,
-        price DECIMAL(10, 2)
-      )`,
-      
-      `CREATE TABLE device_types (
-        id INT PRIMARY KEY AUTO_INCREMENT,
-        name VARCHAR(50) UNIQUE,
-        category VARCHAR(50)
-      )`,
-      
-      `CREATE TABLE users (
-        user_id VARCHAR(20) PRIMARY KEY,
-        age INT,
-        country VARCHAR(100),
-        subscription_type_id INT,
-        registration_date DATE,
-        total_watch_hours DECIMAL(10, 2),
-        FOREIGN KEY (subscription_type_id) REFERENCES subscription_types(id)
-      )`,
-      
-      `CREATE TABLE viewing_sessions (
-        session_id VARCHAR(20) PRIMARY KEY,
-        user_id VARCHAR(20),
-        content_id VARCHAR(20),
-        device_type_id INT,
-        quality VARCHAR(10),
-        watch_date DATE,
-        duration_minutes INT,
-        completion_percentage DECIMAL(5, 2),
-        FOREIGN KEY (user_id) REFERENCES users(user_id),
-        FOREIGN KEY (device_type_id) REFERENCES device_types(id)
-      )`,
-      
-      `CREATE TABLE user_metrics (
-        user_id VARCHAR(20) PRIMARY KEY,
-        total_sessions INT,
-        avg_completion DECIMAL(5, 2),
-        favorite_device VARCHAR(50),
-        last_activity DATE,
-        FOREIGN KEY (user_id) REFERENCES users(user_id)
-      )`
-    ];
-
-    const connection = await pool.getConnection();
-    try {
-      for (const query of queries) {
-        await connection.execute(query);
-      }
-    } finally {
-      connection.release();
+    node.status = status;
+    
+    if (status === 'running') {
+      node.startedAt = nowSec();
+      this.currentNodeId = nodeId;
     }
     
-    await this.sleep(1500);
+    if (status === 'success' || status === 'failed') {
+      node.finishedAt = nowSec();
+      if (this.currentNodeId === nodeId) {
+        this.currentNodeId = undefined;
+      }
+    }
+    
+    if (error) {
+      node.error = error;
+    }
   }
 
-  private async loadDimensions(pool: mysql.Pool): Promise<void> {
-    const connection = await pool.getConnection();
+  // -------------------------------------------------------------------
+  // RUN ETL
+  // -------------------------------------------------------------------
+  public async runETL() {
+    this.resetETL();
+    this.dagStatus = 'running';
+    this.dagStartTime = new Date();
+
     try {
-      // Load subscription types
-      await connection.execute(
-        `INSERT INTO subscription_types (name, price) VALUES 
-         ('Basic', 8.99), ('Standard', 13.99), ('Premium', 17.99)`
-      );
+      // Ejecutar cada paso en orden
+      await this.stepValidate();
+      await this.stepSchema();
+      await this.stepLoadDims();
+      await this.stepUsers();
+      await this.stepSessions();
+      await this.stepAggregations();
+      await this.stepQuality();
+      await this.stepFinish();
+
+      this.dagStatus = 'success';
+      this.dagEndTime = new Date();
+    } catch (err: any) {
+      const msg = err?.message || String(err);
+      this.dagStatus = 'error';
+      this.dagEndTime = new Date();
       
-      // Load device types
-      await connection.execute(
-        `INSERT INTO device_types (name, category) VALUES 
-         ('Desktop', 'Computer'), ('Mobile', 'Phone'), 
-         ('Smart TV', 'Television'), ('Tablet', 'Tablet')`
+      // Marcar el nodo actual como fallido
+      const runningNode = this.nodes.find(n => n.status === 'running');
+      if (runningNode) {
+        this.setNodeStatus(runningNode.id, 'failed', msg);
+      }
+      
+      throw err;
+    }
+  }
+
+  // -------------------------------------------------------------------
+  // Steps (actualizados con los IDs correctos)
+  // -------------------------------------------------------------------
+  private async stepValidate() {
+    this.setNodeStatus('validate_files', 'running');
+    
+    const USERS_CSV = process.env.USERS_CSV || '/app/data/users.csv';
+    const SESSIONS_CSV = process.env.SESSIONS_CSV || '/app/data/viewing_sessions.csv';
+
+    if (!fs.existsSync(USERS_CSV)) {
+      throw new Error(`users.csv no encontrado en ${USERS_CSV}`);
+    }
+    if (!fs.existsSync(SESSIONS_CSV)) {
+      throw new Error(`viewing_sessions.csv no encontrado en ${SESSIONS_CSV}`);
+    }
+
+    // Log de líneas para diagnóstico
+    try {
+      const usersLines = (await fs.promises.readFile(USERS_CSV, 'utf8')).split('\n').length;
+      const sessLines = (await fs.promises.readFile(SESSIONS_CSV, 'utf8')).split('\n').length;
+      console.log(`[ETL] USERS_CSV lines: ${usersLines}`);
+      console.log(`[ETL] SESSIONS_CSV lines: ${sessLines}`);
+    } catch { /* no-op */ }
+
+    // Simular algo de trabajo
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    this.setNodeStatus('validate_files', 'success');
+  }
+
+  private async stepSchema() {
+    this.setNodeStatus('create_schema', 'running');
+    
+    const conn = await this.pool.getConnection();
+    try {
+      // Verificar que las tablas existan
+      await conn.query('SELECT 1 FROM subscription_types LIMIT 1');
+      await conn.query('SELECT 1 FROM device_types LIMIT 1');
+      await conn.query('SELECT 1 FROM users LIMIT 1');
+      await conn.query('SELECT 1 FROM viewing_sessions LIMIT 1');
+      await conn.query('SELECT 1 FROM user_metrics LIMIT 1');
+    } finally {
+      conn.release();
+    }
+
+    await new Promise(resolve => setTimeout(resolve, 800));
+    this.setNodeStatus('create_schema', 'success');
+  }
+
+  private async stepLoadDims() {
+    this.setNodeStatus('load_dimensions', 'running');
+    
+    const conn = await this.pool.getConnection();
+    try {
+      // Cargar dimensiones
+      await conn.query(
+        `INSERT INTO device_types (name) VALUES ('Desktop'), ('Mobile'), ('Smart TV'), ('Tablet'), ('Other')
+         ON DUPLICATE KEY UPDATE name = VALUES(name)`
+      );
+      await conn.query(
+        `INSERT INTO subscription_types (name, price) VALUES
+          ('Basic', 5.99), ('Standard', 9.99), ('Premium', 14.99)
+         ON DUPLICATE KEY UPDATE price = VALUES(price)`
       );
     } finally {
-      connection.release();
+      conn.release();
     }
-    
-    await this.sleep(1000);
+
+    await new Promise(resolve => setTimeout(resolve, 700));
+    this.setNodeStatus('load_dimensions', 'success');
   }
 
-  private async processUsers(pool: mysql.Pool): Promise<void> {
-    const users: any[] = [];
+  private async stepUsers() {
+    this.setNodeStatus('process_users', 'running');
     
-    await new Promise((resolve, reject) => {
-      fs.createReadStream('/app/data/users.csv')
-        .pipe(csv())
-        .on('data', (data) => users.push(data))
-        .on('end', resolve)
-        .on('error', reject);
-    });
-
-    const connection = await pool.getConnection();
+    const USERS_CSV = process.env.USERS_CSV || '/app/data/users.csv';
+    const conn = await this.pool.getConnection();
+    
     try {
-      for (const user of users.slice(0, 100)) { // Process first 100 for demo
-        await connection.execute(
-          `INSERT INTO users (user_id, age, country, subscription_type_id, registration_date, total_watch_hours)
-           SELECT ?, ?, ?, id, ?, ?
-           FROM subscription_types WHERE name = ? LIMIT 1`,
-          [user.user_id, user.age, user.country, user.registration_date, 
-           user.total_watch_time_hours, user.subscription_type]
-        );
-      }
+      // Limpiar datos anteriores
+      await conn.query('DELETE FROM user_metrics');
+      await conn.query('DELETE FROM users');
+
+      const subIdCache = await this.buildSubTypeCache(conn);
+      const batch: any[] = [];
+      const BATCH_SIZE = 1000;
+
+      await new Promise<void>((resolve, reject) => {
+        fs.createReadStream(USERS_CSV)
+          .pipe(csv())
+          .on('data', (raw: any) => {
+            const user_id = String(raw.user_id ?? raw.USER_ID ?? raw.UserId ?? '').trim();
+            if (!user_id) return;
+
+            const age = Number(String(raw.age ?? raw.Age ?? '').replace(/[^\d]/g, '')) || null;
+            const country = (raw.country ?? raw.Country ?? '').toString().trim() || null;
+            const subName = (raw.subscription_type ?? raw.subscription ?? raw.Subscription ?? '').toString().trim() || null;
+            const subId = subName ? (subIdCache.get(subName) ?? null) : null;
+
+            batch.push([user_id, age, country, subId]);
+
+            if (batch.length >= BATCH_SIZE) {
+              const chunk = batch.splice(0, batch.length);
+              conn.query(
+                `INSERT INTO users (user_id, age, country, subscription_type_id)
+                 VALUES ?
+                 ON DUPLICATE KEY UPDATE age=VALUES(age), country=VALUES(country), subscription_type_id=VALUES(subscription_type_id)`,
+                [chunk]
+              ).catch(reject);
+            }
+          })
+          .on('end', async () => {
+            if (batch.length) {
+              await conn.query(
+                `INSERT INTO users (user_id, age, country, subscription_type_id)
+                 VALUES ?
+                 ON DUPLICATE KEY UPDATE age=VALUES(age), country=VALUES(country), subscription_type_id=VALUES(subscription_type_id)`,
+                [batch]
+              );
+            }
+            resolve();
+          })
+          .on('error', reject);
+      });
     } finally {
-      connection.release();
+      conn.release();
     }
-    
-    await this.sleep(2000);
+
+    this.setNodeStatus('process_users', 'success');
   }
 
-  private async processSessions(pool: mysql.Pool): Promise<void> {
-    const sessions: any[] = [];
+  private async stepSessions() {
+    this.setNodeStatus('process_sessions', 'running');
     
-    await new Promise((resolve, reject) => {
-      fs.createReadStream('/app/data/viewing_sessions.csv')
-        .pipe(csv())
-        .on('data', (data) => sessions.push(data))
-        .on('end', resolve)
-        .on('error', reject);
-    });
-
-    const connection = await pool.getConnection();
+    const SESSIONS_CSV = process.env.SESSIONS_CSV || '/app/data/viewing_sessions.csv';
+    const conn = await this.pool.getConnection();
+    
     try {
-      for (const session of sessions.slice(0, 200)) { // Process first 200 for demo
-        await connection.execute(
-          `INSERT INTO viewing_sessions 
-           (session_id, user_id, content_id, device_type_id, quality, watch_date, duration_minutes, completion_percentage)
-           SELECT ?, ?, ?, dt.id, ?, ?, ?, ?
-           FROM device_types dt WHERE dt.name = ? LIMIT 1`,
-          [session.session_id, session.user_id, session.content_id, session.quality_level,
-           session.watch_date, session.watch_duration_minutes, session.completion_percentage,
-           session.device_type]
-        );
-      }
+      await conn.query('DELETE FROM viewing_sessions');
+
+      const devIdCache = await this.buildDeviceTypeCache(conn);
+      const BATCH_SIZE = 1000;
+      const batch: any[] = [];
+
+      await new Promise<void>((resolve, reject) => {
+        fs.createReadStream(SESSIONS_CSV)
+          .pipe(csv())
+          .on('data', (raw: any) => {
+            const session_id = String(raw.session_id ?? raw.SESSION_ID ?? raw.SessionId ?? '').trim();
+            const user_id = String(raw.user_id ?? raw.USER_ID ?? raw.UserId ?? '').trim();
+            if (!session_id || !user_id) return;
+
+            const content_id = (raw.content_id ?? raw.CONTENT_ID ?? raw.ContentId ?? '').toString().trim() || null;
+            
+            const rawDate = (raw.watch_date ?? raw.date ?? raw.WatchDate ?? '').toString().trim();
+            const watch_date = rawDate ? new Date(rawDate) : null;
+            const dateVal = watch_date && !isNaN(watch_date.getTime()) ? watch_date : null;
+
+            const duration_minutes = Number(String(raw.watch_duration_minutes ?? raw.duration_minutes ?? raw.duration ?? raw.minutes ?? '').replace(/[^\d.-]/g, ''));
+            const dur = Number.isFinite(duration_minutes) ? Math.round(duration_minutes) : null;
+
+            const comp = Number(String(raw.completion_percentage ?? raw.completion ?? raw.Completion ?? '').replace(/[^\d.-]/g, ''));
+            const completion = Number.isFinite(comp) ? comp : null;
+
+            const devName = (raw.device_type ?? raw.device ?? raw.Device ?? '').toString().trim();
+            const device_type_id = devName ? (devIdCache.get(devName) ?? devIdCache.get('Other') ?? null) : null;
+
+            batch.push([
+              session_id, 
+              user_id, 
+              content_id, 
+              dateVal ? dateVal.toISOString().slice(0, 19).replace('T', ' ') : null, 
+              dur, 
+              completion, 
+              device_type_id
+            ]);
+
+            if (batch.length >= BATCH_SIZE) {
+              const chunk = batch.splice(0, batch.length);
+              conn.query(
+                `INSERT INTO viewing_sessions
+                  (session_id, user_id, content_id, watch_date, duration_minutes, completion_percentage, device_type_id)
+                 VALUES ?
+                 ON DUPLICATE KEY UPDATE
+                  user_id=VALUES(user_id),
+                  content_id=VALUES(content_id),
+                  watch_date=VALUES(watch_date),
+                  duration_minutes=VALUES(duration_minutes),
+                  completion_percentage=VALUES(completion_percentage),
+                  device_type_id=VALUES(device_type_id)`,
+                [chunk]
+              ).catch(reject);
+            }
+          })
+          .on('end', async () => {
+            if (batch.length) {
+              await conn.query(
+                `INSERT INTO viewing_sessions
+                  (session_id, user_id, content_id, watch_date, duration_minutes, completion_percentage, device_type_id)
+                 VALUES ?
+                 ON DUPLICATE KEY UPDATE
+                  user_id=VALUES(user_id),
+                  content_id=VALUES(content_id),
+                  watch_date=VALUES(watch_date),
+                  duration_minutes=VALUES(duration_minutes),
+                  completion_percentage=VALUES(completion_percentage),
+                  device_type_id=VALUES(device_type_id)`,
+                [batch]
+              );
+            }
+            resolve();
+          })
+          .on('error', reject);
+      });
     } finally {
-      connection.release();
+      conn.release();
     }
-    
-    await this.sleep(2500);
+
+    this.setNodeStatus('process_sessions', 'success');
   }
 
-  private async createAggregations(pool: mysql.Pool): Promise<void> {
-    const connection = await pool.getConnection();
+  private async stepAggregations() {
+    this.setNodeStatus('create_aggregations', 'running');
+    
+    const conn = await this.pool.getConnection();
     try {
-      await connection.execute(`
-        INSERT INTO user_metrics (user_id, total_sessions, avg_completion, last_activity)
+      await conn.query('DELETE FROM user_metrics');
+
+      await conn.query(`
+        INSERT INTO user_metrics (user_id, total_sessions, total_minutes, avg_completion, last_activity, favorite_device)
         SELECT 
           u.user_id,
-          COUNT(vs.session_id),
-          AVG(vs.completion_percentage),
-          MAX(vs.watch_date)
+          COUNT(vs.session_id) AS total_sessions,
+          COALESCE(SUM(vs.duration_minutes), 0) AS total_minutes,
+          COALESCE(AVG(vs.completion_percentage), 0) AS avg_completion,
+          MAX(vs.watch_date) AS last_activity,
+          (
+            SELECT dt.name
+            FROM viewing_sessions vs2
+            JOIN device_types dt ON dt.id = vs2.device_type_id
+            WHERE vs2.user_id = u.user_id
+            GROUP BY dt.name
+            ORDER BY COUNT(*) DESC
+            LIMIT 1
+          ) AS favorite_device
         FROM users u
-        LEFT JOIN viewing_sessions vs ON u.user_id = vs.user_id
+        LEFT JOIN viewing_sessions vs ON vs.user_id = u.user_id
         GROUP BY u.user_id
-        ON DUPLICATE KEY UPDATE
-          total_sessions = VALUES(total_sessions),
-          avg_completion = VALUES(avg_completion),
-          last_activity = VALUES(last_activity)
       `);
     } finally {
-      connection.release();
+      conn.release();
     }
-    
-    await this.sleep(1500);
+
+    await new Promise(resolve => setTimeout(resolve, 1200));
+    this.setNodeStatus('create_aggregations', 'success');
   }
 
-  private async validateData(pool: mysql.Pool): Promise<void> {
-    const connection = await pool.getConnection();
+  private async stepQuality() {
+    this.setNodeStatus('validate_data', 'running');
+    
+    const conn = await this.pool.getConnection();
     try {
-      const [userCount] = await connection.execute('SELECT COUNT(*) as count FROM users');
-      const [sessionCount] = await connection.execute('SELECT COUNT(*) as count FROM viewing_sessions');
-      
-      console.log('Data validation:', { userCount, sessionCount });
+      const [[{ cUsers }]]: any = await conn.query('SELECT COUNT(*) AS cUsers FROM users');
+      const [[{ cSess }]]: any = await conn.query('SELECT COUNT(*) AS cSess FROM viewing_sessions');
+
+      if (Number(cUsers) === 0) throw new Error('No se cargaron usuarios');
+      if (Number(cSess) === 0) throw new Error('No se cargaron sesiones');
+
+      const [[{ badDates }]]: any = await conn.query(
+        'SELECT COUNT(*) AS badDates FROM viewing_sessions WHERE watch_date IS NULL'
+      );
+      if (badDates > 0) {
+        console.warn(`[QUALITY] ${badDates} filas sin watch_date`);
+      }
     } finally {
-      connection.release();
+      conn.release();
     }
+
+    await new Promise(resolve => setTimeout(resolve, 600));
+    this.setNodeStatus('validate_data', 'success');
+  }
+
+  private async stepFinish() {
+    this.setNodeStatus('generate_stats', 'running');
     
-    await this.sleep(1000);
-  }
-
-  private async generateStatistics(pool: mysql.Pool): Promise<void> {
-    const connection = await pool.getConnection();
-    try {
-      const [stats] = await connection.execute(`
-        SELECT 
-          COUNT(DISTINCT u.user_id) as total_users,
-          COUNT(DISTINCT vs.session_id) as total_sessions,
-          AVG(vs.completion_percentage) as avg_completion
-        FROM users u
-        LEFT JOIN viewing_sessions vs ON u.user_id = vs.user_id
-      `);
-      
-      console.log('Statistics generated:', stats);
-    } finally {
-      connection.release();
-    }
+    // Simular generación de estadísticas
+    await new Promise(resolve => setTimeout(resolve, 800));
     
-    await this.sleep(800);
+    console.log('[ETL] Pipeline completed successfully!');
+    this.setNodeStatus('generate_stats', 'success');
   }
 
-  private sleep(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+  // -------------------------------------------------------------------
+  // Helpers
+  // -------------------------------------------------------------------
+  private async buildDeviceTypeCache(conn: mysql.PoolConnection) {
+    const map = new Map<string, number>();
+    const [rows]: any = await conn.query('SELECT id, name FROM device_types');
+    for (const r of rows) map.set(String(r.name), Number(r.id));
+    return map;
   }
 
-  getDAGStatus(): ETLDag {
-    return this.dag;
-  }
-
-  resetETL() {
-    this.dag = this.initializeDAG();
+  private async buildSubTypeCache(conn: mysql.PoolConnection) {
+    const map = new Map<string, number>();
+    const [rows]: any = await conn.query('SELECT id, name FROM subscription_types');
+    for (const r of rows) map.set(String(r.name), Number(r.id));
+    return map;
   }
 }

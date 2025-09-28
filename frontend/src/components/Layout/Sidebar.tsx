@@ -15,7 +15,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange }) => {
   ];
 
   return (
-    <aside className="w-64 h-screen bg-white border-r border-gray-200">
+    <aside className="w-64 h-screen bg-white border-r border-gray-200 flex flex-col">
       {/* Logo */}
       <div className="p-6 border-b border-gray-200">
         <div className="flex items-center space-x-3">
@@ -23,29 +23,26 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange }) => {
             <DatabaseIcon size={20} className="text-white" />
           </div>
           <div>
-            <h2 className="font-bold text-gray-900">Streaming ETL</h2>
+            <h2 className="font-bold text-gray-900 leading-tight">Streaming ETL</h2>
             <p className="text-xs text-gray-500">Data Pipeline</p>
           </div>
         </div>
       </div>
 
       {/* Navigation */}
-      <nav className="p-4">
+      <nav className="p-4 space-y-1">
         {menuItems.map((item) => {
           const Icon = item.icon;
           const isActive = activeTab === item.id;
-          
+
           return (
             <button
               key={item.id}
               onClick={() => onTabChange(item.id)}
-              className={`
-                w-full flex items-center space-x-3 px-4 py-3 rounded-lg mb-1 transition-colors
-                ${isActive 
-                  ? 'bg-black text-white' 
-                  : 'text-gray-700 hover:bg-gray-100'
-                }
-              `}
+              className={[
+                'w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors',
+                isActive ? 'bg-black text-white' : 'text-gray-700 hover:bg-gray-100',
+              ].join(' ')}
             >
               <Icon size={20} />
               <span className="font-medium">{item.label}</span>
@@ -54,12 +51,12 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange }) => {
         })}
       </nav>
 
-      {/* Status Section */}
-      <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200">
+      {/* Status Section at the bottom of the aside (no absolute) */}
+      <div className="mt-auto p-4 border-t border-gray-200">
         <div className="bg-gray-50 rounded-lg p-4">
           <div className="flex items-center justify-between mb-2">
             <span className="text-sm font-medium text-gray-700">MySQL Status</span>
-            <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+            <div className="w-2 h-2 bg-green-500 rounded-full" />
           </div>
           <p className="text-xs text-gray-500">Database Connected</p>
           <p className="text-xs text-gray-500 mt-1">streaming_db</p>

@@ -3,12 +3,21 @@ import { ETLService } from '../services/etl.service';
 
 const etlService = new ETLService();
 
+/** Helper: deshabilitar caché para respuestas dinámicas */
+function noStore(res: Response) {
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
+}
+
 /**
  * POST /api/etl/start
  * Inicia la ejecución del ETL (asíncrona).
  */
 export async function startETL(_req: Request, res: Response) {
   try {
+    noStore(res);
+
     const current = etlService.getDAGStatus();
     if (current.status === 'running') {
       return res.status(409).json({
@@ -40,6 +49,7 @@ export async function startETL(_req: Request, res: Response) {
  */
 export async function getETLStatus(_req: Request, res: Response) {
   try {
+    noStore(res);
     const dag = etlService.getDAGStatus();
     return res.json({ success: true, dag });
   } catch (err) {
@@ -54,6 +64,8 @@ export async function getETLStatus(_req: Request, res: Response) {
  */
 export async function resetETL(_req: Request, res: Response) {
   try {
+    noStore(res);
+
     const current = etlService.getDAGStatus();
     if (current.status === 'running') {
       return res.status(409).json({

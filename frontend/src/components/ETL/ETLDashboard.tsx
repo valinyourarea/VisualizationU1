@@ -43,7 +43,7 @@ export const ETLDashboard: React.FC<ETLDashboardProps> = ({
   simulateDefault = false,
   simulateStepMs = 900,
 }) => {
-  // Copia local para “jugar” sin modificar el prop
+  // Copia local para "jugar" sin modificar el prop
   const [localDag, setLocalDag] = useState<ETLDag | null>(dag ?? null);
 
   // Estado de simulación

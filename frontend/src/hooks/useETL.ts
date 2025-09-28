@@ -1,29 +1,37 @@
 // frontend/src/hooks/useETL.ts
-
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { api } from '../services/api';
 
-/** Tipos base (ajústalos a tus tipos si ya existen) */
-export type DagNodeStatus = 'pending' | 'running' | 'success' | 'error' | 'idle' | string;
+export type DagNodeStatus =
+  | 'pending'
+  | 'running'
+  | 'success'
+  | 'failed'
+  | 'error'
+  | 'skipped'
+  | 'idle'
+  | string;
 
 export type DagNode = {
   id: string;
   name: string;
   status: DagNodeStatus;
-  dependencies: string[];
+  dependencies?: string[];
+  startTime?: string; // ISO
+  endTime?: string;   // ISO
 };
 
 export type ETLDag = {
   id: string;
   name: string;
   status: 'idle' | 'running' | 'success' | 'error' | string;
-  nodes: DagNode[];
+  nodes?: DagNode[];
   startTime?: string; // ISO
   endTime?: string;   // ISO
   stats?: Record<string, unknown>;
 };
 
-/** ←-- TU DAG SEMILLA (el que tenías) */
+// Seed para mostrar algo siempre
 const SEED_DAG: ETLDag = {
   id: 'streaming_etl_dag',
   name: 'Streaming Data ETL Pipeline',
@@ -41,11 +49,8 @@ const SEED_DAG: ETLDag = {
 };
 
 type UseETLState = {
-  /** DAG real (null hasta que el backend responda) */
   dag: ETLDag | null;
-  /** DAG para visualizar (usa el SEED si aún no hay real) */
   viewDag: ETLDag;
-  /** ¿Ya intentamos/terminamos la primera carga desde API? */
   hydrated: boolean;
   loading: boolean;
   error: string | null;
@@ -55,44 +60,30 @@ type UseETLState = {
   resetETL: () => Promise<void>;
 };
 
-/** Endpoints (ajústalos si cambian en tu backend) */
 const ENDPOINT_STATUS = '/etl/status';
 const ENDPOINT_START  = '/etl/start';
 const ENDPOINT_RESET  = '/etl/reset';
 
-/** Normaliza distintas formas de respuesta:
- *  - { dag }, { data:{ dag } }, { result:{ dag } }, o el DAG directo
- */
 function normalizeDag(res: any): ETLDag | undefined {
-  const wrapped =
-    res?.dag ??
-    res?.data?.dag ??
-    res?.result?.dag;
-
+  const wrapped = res?.dag ?? res?.data?.dag ?? res?.result?.dag;
   if (wrapped && typeof wrapped === 'object') return wrapped as ETLDag;
-
-  if (res && typeof res === 'object' && res.id && res.nodes) {
-    return res as ETLDag;
-  }
+  if (res && typeof res === 'object' && res.id && res.nodes) return res as ETLDag;
   return undefined;
 }
 
 export function useETL(): UseETLState {
-  // Guardamos el DAG real aquí (null hasta que llegue del backend)
   const [dag, setDag] = useState<ETLDag | null>(null);
-
-  // Bandera para saber si ya intentamos hidratar (éxito o fallo)
   const [hydrated, setHydrated] = useState(false);
-
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState(false);
   const [error,   setError]   = useState<string | null>(null);
 
-  // Evita setState tras unmount
   const mountedRef = useRef(true);
   useEffect(() => {
     mountedRef.current = true;
     return () => { mountedRef.current = false; };
   }, []);
+
+  const debugEnabled = typeof window !== 'undefined' && localStorage.getItem('etl_debug') === '1';
 
   const fetchStatus = useCallback(async () => {
     setLoading(true);
@@ -101,8 +92,13 @@ export function useETL(): UseETLState {
       const res = await api.get(ENDPOINT_STATUS);
       const next = normalizeDag(res);
 
+      if (debugEnabled) {
+        console.groupCollapsed('[ETL] /etl/status payload');
+        console.log(res);
+        console.groupEnd();
+      }
+
       if (!next) {
-        console.error('[useETL] Unexpected payload from', ENDPOINT_STATUS, res);
         if (mountedRef.current) {
           setError('Unexpected payload: missing dag');
           setDag(null);
@@ -111,7 +107,6 @@ export function useETL(): UseETLState {
         if (mountedRef.current) setDag(next);
       }
     } catch (e: any) {
-      console.error('[useETL] fetch error:', e);
       if (mountedRef.current) {
         setError(e?.message || String(e));
         setDag(null);
@@ -119,50 +114,55 @@ export function useETL(): UseETLState {
     } finally {
       if (mountedRef.current) {
         setLoading(false);
-        setHydrated(true); // ← ya intentamos hidratar (haya salido bien o mal)
+        setHydrated(true);
       }
     }
-  }, []);
+  }, [debugEnabled]);
 
   const startETL = useCallback(async () => {
     try {
+      if (debugEnabled) console.debug('[ETL] POST /etl/start');
       await api.post(ENDPOINT_START);
       await fetchStatus();
-    } catch (e) {
-      console.error('[useETL] start error:', e);
-      if (mountedRef.current) setError((e as Error)?.message || String(e));
+    } catch (e: any) {
+      if (mountedRef.current) setError(e?.message || String(e));
     }
-  }, [fetchStatus]);
+  }, [fetchStatus, debugEnabled]);
 
   const resetETL = useCallback(async () => {
     try {
+      if (debugEnabled) console.debug('[ETL] POST /etl/reset');
       await api.post(ENDPOINT_RESET);
       await fetchStatus();
-    } catch (e) {
-      console.error('[useETL] reset error:', e);
-      if (mountedRef.current) setError((e as Error)?.message || String(e));
+    } catch (e: any) {
+      if (mountedRef.current) setError(e?.message || String(e));
     }
-  }, [fetchStatus]);
+  }, [fetchStatus, debugEnabled]);
 
-  // DAG “efectivo” que ve la UI: si no hay real, usamos el SEED
-  const viewDag = useMemo<ETLDag>(() => dag ?? SEED_DAG, [dag]);
+  const viewDag = useMemo<ETLDag>(() => {
+    const v = dag ?? SEED_DAG;
+    if (debugEnabled) {
+      console.groupCollapsed('[ETL] viewDag');
+      console.log(v);
+      console.groupEnd();
+    }
+    return v;
+  }, [dag, debugEnabled]);
 
   const isRunning = useMemo(() => viewDag.status === 'running', [viewDag.status]);
 
-  /** (Opcional) Auto-poll mientras esté corriendo */
   useEffect(() => {
     if (!isRunning) return;
     const id = setInterval(() => { fetchStatus().catch(() => void 0); }, 2000);
     return () => clearInterval(id);
   }, [isRunning, fetchStatus]);
 
-  /** Carga inicial */
   useEffect(() => { fetchStatus().catch(() => void 0); }, [fetchStatus]);
 
   return {
-    dag,              // null hasta hidratar; te sirve para saber si hay datos reales
-    viewDag,          // siempre tiene algo que pintar (seed o real)
-    hydrated,         // ya intentamos hablar con el backend
+    dag,
+    viewDag,
+    hydrated,
     loading,
     error,
     isRunning,
@@ -171,3 +171,5 @@ export function useETL(): UseETLState {
     resetETL,
   };
 }
+
+
