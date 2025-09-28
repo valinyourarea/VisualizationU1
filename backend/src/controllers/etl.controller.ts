@@ -1,74 +1,77 @@
-// ============= backend/src/controllers/etl.controller.ts =============
-import { Request, Response } from 'express';
+import type { Request, Response } from 'express';
 import { ETLService } from '../services/etl.service';
 
 const etlService = new ETLService();
 
-export const startETL = async (req: Request, res: Response) => {
+/**
+ * POST /api/etl/start
+ * Inicia la ejecución del ETL (asíncrona).
+ */
+export async function startETL(_req: Request, res: Response) {
   try {
-    // Check if ETL is already running
-    const currentStatus = etlService.getDAGStatus();
-    if (currentStatus.status === 'running') {
-      return res.status(400).json({
+    const current = etlService.getDAGStatus();
+    if (current.status === 'running') {
+      return res.status(409).json({
         success: false,
-        message: 'ETL pipeline is already running'
+        message: 'ETL pipeline is already running',
+        dag: current,
       });
     }
 
-    // Start ETL in background
-    etlService.runETL().catch(error => {
-      console.error('ETL failed:', error);
+    // Ejecuta en background
+    etlService.runETL().catch((err) => {
+      console.error('ETL failed:', err);
     });
 
-    res.json({
+    return res.json({
       success: true,
       message: 'ETL pipeline started',
-      data: etlService.getDAGStatus()
+      dag: etlService.getDAGStatus(),
     });
-  } catch (error: any) {
-    res.status(500).json({
-      success: false,
-      message: error.message
-    });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    return res.status(500).json({ success: false, message });
   }
-};
+}
 
-export const getETLStatus = async (req: Request, res: Response) => {
+/**
+ * GET /api/etl/status
+ * Devuelve el estado actual del DAG del ETL.
+ */
+export async function getETLStatus(_req: Request, res: Response) {
   try {
-    const status = etlService.getDAGStatus();
-    res.json({
-      success: true,
-      dag: status
-    });
-  } catch (error: any) {
-    res.status(500).json({
-      success: false,
-      message: error.message
-    });
+    const dag = etlService.getDAGStatus();
+    return res.json({ success: true, dag });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    return res.status(500).json({ success: false, message });
   }
-};
+}
 
-export const resetETL = async (req: Request, res: Response) => {
+/**
+ * POST /api/etl/reset
+ * Resetea el estado del ETL (solo si NO está corriendo).
+ */
+export async function resetETL(_req: Request, res: Response) {
   try {
-    const currentStatus = etlService.getDAGStatus();
-    if (currentStatus.status === 'running') {
-      return res.status(400).json({
+    const current = etlService.getDAGStatus();
+    if (current.status === 'running') {
+      return res.status(409).json({
         success: false,
-        message: 'Cannot reset while ETL is running'
+        message: 'Cannot reset while ETL is running',
+        dag: current,
       });
     }
 
     etlService.resetETL();
-    
-    res.json({
+
+    return res.json({
       success: true,
       message: 'ETL pipeline reset successfully',
-      data: etlService.getDAGStatus()
+      dag: etlService.getDAGStatus(),
     });
-  } catch (error: any) {
-    res.status(500).json({
-      success: false,
-      message: error.message
-    });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    return res.status(500).json({ success: false, message });
   }
-};
+}
