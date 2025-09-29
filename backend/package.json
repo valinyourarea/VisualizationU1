@@ -1,0 +1,27 @@
+{
+  "name": "streaming-etl-backend",
+  "version": "1.0.0",
+  "description": "ETL Backend for Streaming Analytics",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "nodemon",
+    "build": "tsc",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "mysql2": "^3.6.5",
+    "mongoose": "^8.0.3",
+    "csv-parser": "^3.0.0",
+    "dotenv": "^16.3.1"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.10.5",
+    "@types/cors": "^2.8.17",
+    "typescript": "^5.3.3",
+    "nodemon": "^3.0.2",
+    "ts-node": "^10.9.2"
+  }
+}
